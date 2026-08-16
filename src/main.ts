@@ -1,0 +1,223 @@
+// Só o subset latino: o import padrão traz cirílico, grego e vietnamita, que
+// esta interface nunca usa e pesariam mais que o resto do bundle inteiro.
+import '@fontsource/press-start-2p/latin-400.css';
+import '@fontsource/ibm-plex-mono/latin-400.css';
+import '@fontsource/ibm-plex-mono/latin-600.css';
+import './style.css';
+
+import type { Arena } from './core/physics';
+import type { EntityType } from './core/rules';
+import { countByType, createSimulation, tick } from './core/simulation';
+import { syncCanvasSize } from './render/canvas';
+import {
+  advanceEffects,
+  createEffects,
+  pushConversions,
+} from './render/effects';
+import { render } from './render/renderer';
+import { createConfigScreen } from './ui/config-screen';
+import { createControls, type SpeedStep } from './ui/controls';
+import { byId } from './ui/dom';
+import { createEndScreen } from './ui/end-screen';
+import { pushMatch, type MatchRecord } from './ui/history';
+import { renderHistory } from './ui/history-list';
+import { createHud } from './ui/hud';
+import {
+  bumpPopulation,
+  defaultMatchConfig,
+  setSpeedLevel,
+  toSpawnConfig,
+} from './ui/match-config';
+import { createScoreboard } from './ui/scoreboard';
+import { createScreens } from './ui/screens';
+import { createTimeline, sampleTimeline } from './ui/timeline';
+
+/** Arena em unidades lógicas. O canvas escala; a partida não muda. */
+const ARENA: Arena = { width: 1000, height: 1000 };
+
+/**
+ * Passo fixo da simulação, em segundos.
+ *
+ * Desacopla a física do FPS de verdade: seja o monitor de 60Hz ou de 144Hz, a
+ * partida avança nos mesmos incrementos. O `MAX_SUBSTEPS` é a válvula de
+ * escape — sem ele, um quadro atrasado dispararia uma avalanche de subpassos
+ * que atrasaria o próximo quadro ainda mais, em espiral.
+ */
+const SUBSTEP = 1 / 120;
+const MAX_SUBSTEPS = 8;
+
+/** Teto do intervalo entre quadros: protege contra aba em segundo plano. */
+const MAX_FRAME_DT = 0.05;
+
+/** Congelamento no instante da conversão — é o que dá peso ao golpe. */
+const HIT_STOP = 0.035;
+
+/**
+ * Intervalo mínimo entre dois congelamentos.
+ *
+ * Sem isto, na fase quente da partida há várias conversões por segundo e o
+ * hit-stop deixa de ser ênfase para virar engasgo permanente.
+ */
+const HIT_STOP_COOLDOWN = 0.15;
+
+/**
+ * Resolve o contexto 2D ou falha alto.
+ *
+ * O `throw` devolve um tipo não-nulo, o que mantém o `ctx` estreitado dentro do
+ * loop — checar com `if` aqui fora não sobreviveria ao closure.
+ */
+function arenaContext(): CanvasRenderingContext2D {
+  const canvas = byId<HTMLCanvasElement>('arena');
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Contexto 2D indisponível neste navegador.');
+  return context;
+}
+
+const ctx = arenaContext();
+const screens = createScreens('config');
+const hud = createHud();
+const scoreboard = createScoreboard();
+
+let matchConfig = defaultMatchConfig();
+
+/** Populações com que a partida corrente começou, para o resumo do fim. */
+let setup = { ...matchConfig.counts };
+
+let state = createSimulation(toSpawnConfig(matchConfig, ARENA));
+let effects = createEffects(state.entities.length);
+let timeline = createTimeline(countByType(state.entities));
+let history: MatchRecord[] = [];
+
+let speed: SpeedStep = 1;
+let paused = false;
+let accumulator = 0;
+let hitStop = 0;
+let sinceHitStop = HIT_STOP_COOLDOWN;
+let lastFrame = performance.now();
+
+function startMatch(): void {
+  setup = { ...matchConfig.counts };
+  state = createSimulation(toSpawnConfig(matchConfig, ARENA));
+  effects = createEffects(state.entities.length);
+  timeline = createTimeline(countByType(state.entities));
+
+  accumulator = 0;
+  hitStop = 0;
+  paused = false;
+  speed = 1;
+
+  controls.setPaused(false);
+  controls.setSpeed(1);
+  screens.show('arena');
+}
+
+function finishMatch(winner: EntityType): void {
+  const result = {
+    winner,
+    elapsed: state.elapsed,
+    conversions: state.totalConversions,
+    setup,
+  };
+
+  history = pushMatch(history, result);
+  renderHistory(history);
+
+  endScreen.show({ ...result, samples: timeline.samples });
+  screens.show('end');
+}
+
+const configScreen = createConfigScreen({
+  onBump(type, delta) {
+    matchConfig = bumpPopulation(matchConfig, type, delta);
+    configScreen.sync(matchConfig);
+  },
+
+  onSpeedLevel(level) {
+    matchConfig = setSpeedLevel(matchConfig, level);
+    configScreen.sync(matchConfig);
+  },
+
+  onStart: startMatch,
+});
+
+const endScreen = createEndScreen({
+  onAgain: startMatch,
+  onAdjust: () => screens.show('config'),
+});
+
+const controls = createControls({
+  onSpeedChange(next) {
+    speed = next;
+    controls.setSpeed(next);
+  },
+
+  onPauseToggle() {
+    paused = !paused;
+    controls.setPaused(paused);
+  },
+
+  onRestart: startMatch,
+});
+
+/** Avança a simulação em passos fixos, consumindo o tempo do quadro. */
+function simulate(dt: number): void {
+  accumulator += dt * speed;
+  let steps = 0;
+
+  while (accumulator >= SUBSTEP && steps < MAX_SUBSTEPS) {
+    accumulator -= SUBSTEP;
+    steps++;
+
+    state = tick(state, SUBSTEP);
+    if (state.conversions.length === 0) continue;
+
+    pushConversions(effects, state.conversions);
+
+    if (sinceHitStop >= HIT_STOP_COOLDOWN) {
+      hitStop = HIT_STOP;
+      sinceHitStop = 0;
+      break; // congela já neste quadro, não no seguinte
+    }
+  }
+
+  // Estourou o orçamento de subpassos: descarta o resto em vez de acumular
+  // uma dívida de tempo que nunca seria paga.
+  if (steps === MAX_SUBSTEPS) accumulator = 0;
+}
+
+function frame(now: number): void {
+  const dt = Math.min(Math.max(0, now - lastFrame) / 1000, MAX_FRAME_DT);
+  lastFrame = now;
+  sinceHitStop += dt;
+
+  if (screens.current() === 'arena') {
+    if (!paused) {
+      if (hitStop > 0) hitStop -= dt;
+      else simulate(dt);
+    }
+
+    // Os efeitos andam pelo tempo real, não pelo simulado: em 4× a partida
+    // acelera, mas a animação de impacto continua legível.
+    advanceEffects(effects, dt);
+
+    const counts = countByType(state.entities);
+    sampleTimeline(timeline, state.elapsed, counts);
+
+    const view = syncCanvasSize(ctx);
+    render(ctx, state, view, effects);
+    hud.sync(state);
+    scoreboard.sync(counts);
+
+    // Desenha o quadro final antes de trocar de tela: o jogador vê o golpe
+    // que decidiu a partida.
+    if (state.winner !== null) finishMatch(state.winner);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+configScreen.sync(matchConfig);
+controls.setSpeed(speed);
+controls.setPaused(paused);
+renderHistory(history);
+requestAnimationFrame(frame);

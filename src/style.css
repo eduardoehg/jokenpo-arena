@@ -1,0 +1,560 @@
+:root {
+  color-scheme: dark;
+
+  --noite: #0b0b14;
+  --gabinete: #1a1a2e;
+  --linha: #2e2e4d;
+  --dim: #3b3b57;
+  --muted: #8a8aae;
+  --label: #6b6b8a;
+
+  --papel: #f5f1e0;
+  --pedra: #3b82f6;
+  --tesoura: #ffc233;
+  --magenta: #ff2e88;
+  --magenta-dark: #a6155a;
+  --magenta-light: #ff7bb0;
+
+  --display: 'Press Start 2P', monospace;
+  --ui: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--noite);
+  color: var(--papel);
+  font-family: var(--ui);
+}
+
+/* Gabinete de arcade: bevel duro, sem blur nem raio de canto. */
+.cabinet {
+  width: min(1180px, 100%);
+  padding: 32px;
+  background: var(--gabinete);
+  border: 4px solid var(--noite);
+  box-shadow:
+    inset 4px 4px 0 var(--linha),
+    inset -4px -4px 0 #05050b;
+}
+
+.panel {
+  padding: 18px;
+  background: var(--noite);
+  border: 2px solid var(--linha);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--label);
+  text-transform: uppercase;
+}
+
+.num {
+  font-family: var(--display);
+}
+
+.accent {
+  color: var(--magenta);
+  font-size: 20px;
+  margin-top: 12px;
+}
+
+/* ---------- Placar Trinário ---------- */
+
+.scoreboard-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.scoreboard-head .num {
+  font-size: 12px;
+}
+
+.scoreboard {
+  display: flex;
+  gap: 4px;
+  height: 58px;
+  /* A folga acomoda o número que salta para fora do segmento estreito. */
+  margin-top: 44px;
+  background: var(--noite);
+  border: 2px solid var(--noite);
+}
+
+.seg {
+  position: relative;
+  min-width: 0;
+}
+
+.seg > span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--display);
+  font-size: 18px;
+  /* Métrica previsível: o salto é medido em px, e a Press Start 2P tem
+     line-height natural alto o bastante para desalinhar o cálculo. */
+  line-height: 1;
+  color: var(--noite);
+  white-space: nowrap;
+  pointer-events: none;
+  /* Movimento em degraus: nada de transição contínua. */
+  transition:
+    transform 0.12s steps(2),
+    color 0.12s steps(2);
+}
+
+/*
+ * Segmento estreito demais para conter o número: ele salta para fora e assume
+ * a cor do tipo.
+ *
+ * O deslocamento precisa tirar o número *inteiro* de cima da barra. Meio em
+ * cima, meio fora, o papel desaparece — a cor do tipo é a mesma da barra.
+ * 29px chegam à borda superior; 44px deixam 6px de respiro acima dela.
+ */
+.seg.narrow > span {
+  transform: translate(-50%, -50%) translateY(-44px);
+  color: var(--seg-color);
+}
+
+/*
+ * Segmento zerado tem largura zero, e um rótulo centrado nele escapa da barra:
+ * no primeiro segmento metade do número sai pela borda esquerda do gabinete.
+ * Nas pontas, portanto, o número ancora na borda interna e cresce para dentro.
+ * O segmento do meio é sempre ladeado pelos outros dois, então centralizar é
+ * seguro.
+ */
+.seg.narrow:first-child > span {
+  left: 0;
+  transform: translate(0, -50%) translateY(-44px);
+}
+
+.seg.narrow:last-child > span {
+  left: auto;
+  right: 0;
+  transform: translate(0, -50%) translateY(-44px);
+}
+
+.seg--paper {
+  background: var(--papel);
+  --seg-color: var(--papel);
+}
+.seg--rock {
+  background: var(--pedra);
+  --seg-color: var(--pedra);
+}
+.seg--scissors {
+  background: var(--tesoura);
+  --seg-color: var(--tesoura);
+}
+
+/* ---------- layout da tela de arena ---------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 648px) 250px;
+  gap: 20px;
+  margin-top: 24px;
+  align-items: start;
+  justify-content: center;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.col--left {
+  gap: 26px;
+}
+
+.col--right {
+  gap: 16px;
+}
+
+.rules {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.arena-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+#arena {
+  display: block;
+  width: min(640px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+  background: var(--noite);
+  border: 4px solid var(--linha);
+  image-rendering: pixelated;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+}
+
+.stat .num {
+  font-size: 22px;
+}
+
+.stat--rock,
+.stat--rock .num {
+  color: var(--pedra);
+}
+.stat--scissors,
+.stat--scissors .num {
+  color: var(--tesoura);
+}
+
+.clock {
+  font-size: 26px;
+}
+
+/* ---------- botões ---------- */
+
+.btn {
+  font-family: var(--display);
+  cursor: pointer;
+  color: var(--label);
+  background: var(--noite);
+  border: 2px solid var(--linha);
+}
+
+.speed-row {
+  display: flex;
+  gap: 6px;
+}
+
+.speed-btn {
+  flex: 1;
+  font-size: 12px;
+  padding: 14px 0;
+}
+
+.speed-btn.active {
+  color: var(--noite);
+  background: var(--papel);
+  border-color: var(--papel);
+}
+
+.btn-pause {
+  font-size: 14px;
+  padding: 20px 0;
+  color: var(--noite);
+  background: var(--papel);
+  border: 0;
+}
+
+/* Pausado: o botão vira "CONTINUAR" e muda de cor para sinalizar o estado. */
+.btn-pause.resumed {
+  background: var(--tesoura);
+}
+
+.btn-ghost {
+  font-size: 12px;
+  padding: 16px;
+  color: var(--muted);
+}
+
+.btn-primary {
+  font-family: var(--display);
+  font-size: 20px;
+  padding: 24px;
+  cursor: pointer;
+  color: var(--noite);
+  background: var(--magenta);
+  border: 0;
+  /* Bevel sólido, nunca gradiente. */
+  box-shadow:
+    inset 5px 5px 0 var(--magenta-light),
+    inset -5px -5px 0 var(--magenta-dark);
+}
+
+.hidden {
+  display: none;
+}
+
+/* ---------- tela 1: configuração ---------- */
+
+.title {
+  margin: 16px 0 0;
+  font-family: var(--display);
+  font-size: 48px;
+  line-height: 1.3;
+  text-shadow: 6px 6px 0 var(--magenta);
+}
+
+.subtitle {
+  margin: 22px 0 0;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.card {
+  align-items: center;
+  text-align: center;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+
+.card-name {
+  font-size: 12px;
+}
+
+.card--rock .card-name,
+.card--rock .card-count {
+  color: var(--pedra);
+}
+
+.card--scissors .card-name,
+.card--scissors .card-count {
+  color: var(--tesoura);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 44px é o alvo mínimo de toque no mobile. */
+.step {
+  width: 44px;
+  height: 44px;
+  font-size: 12px;
+  color: var(--papel);
+  background: var(--gabinete);
+}
+
+.card-count {
+  min-width: 64px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.speed-panel {
+  margin-top: 20px;
+}
+
+.speed-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.speed-head .num {
+  font-size: 16px;
+}
+
+.speed-cells {
+  display: flex;
+  gap: 4px;
+}
+
+.speed-cell {
+  flex: 1;
+  height: 28px;
+  border: 0;
+  cursor: pointer;
+  background: var(--linha);
+}
+
+.speed-cell.lit {
+  background: var(--magenta);
+}
+
+.btn-start {
+  width: 100%;
+  margin-top: 28px;
+}
+
+/* ---------- tela 3: fim de partida ---------- */
+
+.end-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 48px;
+  align-items: center;
+}
+
+#winner-icon {
+  width: 168px;
+  height: 168px;
+  image-rendering: pixelated;
+}
+
+.end-info {
+  flex: 1 1 300px;
+}
+
+.end-title {
+  margin-top: 16px;
+  font-size: 40px;
+  line-height: 1.4;
+  /* O nome do vencedor vem com quebra de linha embutida. */
+  white-space: pre-line;
+  text-shadow: 5px 5px 0 var(--noite);
+}
+
+.end-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-top: 30px;
+}
+
+.end-stat {
+  margin-top: 10px;
+  font-size: 22px;
+}
+
+.chart-block,
+.history-block {
+  margin-top: 32px;
+}
+
+.chart {
+  display: flex;
+  gap: 2px;
+  height: 200px;
+  margin-top: 10px;
+  padding: 8px;
+  align-items: flex-end;
+  background: var(--noite);
+  border: 2px solid var(--linha);
+}
+
+.chart-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.chart-bar--paper {
+  background: var(--papel);
+}
+.chart-bar--rock {
+  background: var(--pedra);
+}
+.chart-bar--scissors {
+  background: var(--tesoura);
+}
+
+.end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.end-actions .btn-primary {
+  flex: 1 1 240px;
+  font-size: 18px;
+}
+
+.end-actions .btn-ghost {
+  flex: 0 1 280px;
+}
+
+/* ---------- histórico ---------- */
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.hist-row {
+  display: flex;
+  gap: 18px;
+  padding-bottom: 5px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--linha);
+}
+
+.hist-number {
+  width: 44px;
+  color: var(--dim);
+}
+
+.hist-winner {
+  width: 120px;
+}
+
+.hist-winner--paper {
+  color: var(--papel);
+}
+.hist-winner--rock {
+  color: var(--pedra);
+}
+.hist-winner--scissors {
+  color: var(--tesoura);
+}
+
+.hist-time {
+  width: 90px;
+}
+
+@media (max-width: 900px) {
+  .cabinet {
+    padding: 18px;
+  }
+
+  .layout,
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  #arena {
+    width: 100%;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .end-head {
+    gap: 24px;
+  }
+}

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jokenpo Arena</title>
+  </head>
+  <body>
+    <div class="cabinet">
+      <!-- ============ 1. CONFIGURAÇÃO ============ -->
+      <section id="screen-config">
+        <h1 class="title">JOKENPO<br />ARENA</h1>
+        <p class="label subtitle">
+          SIMULADOR DE COMBATE · 3 POPULAÇÕES · 1 SOBREVIVENTE
+        </p>
+
+        <div class="cards">
+          <div class="panel card">
+            <canvas class="card-icon" data-type="paper" width="96" height="96"></canvas>
+            <div class="num card-name">PAPEL</div>
+            <div class="stepper">
+              <button class="btn step" data-bump="paper" data-delta="-5" type="button">-</button>
+              <div class="num card-count" id="cfg-paper">030</div>
+              <button class="btn step" data-bump="paper" data-delta="5" type="button">+</button>
+            </div>
+            <div class="label">PORTAL NORTE</div>
+          </div>
+
+          <div class="panel card card--rock">
+            <canvas class="card-icon" data-type="rock" width="96" height="96"></canvas>
+            <div class="num card-name">PEDRA</div>
+            <div class="stepper">
+              <button class="btn step" data-bump="rock" data-delta="-5" type="button">-</button>
+              <div class="num card-count" id="cfg-rock">030</div>
+              <button class="btn step" data-bump="rock" data-delta="5" type="button">+</button>
+            </div>
+            <div class="label">PORTAL OESTE</div>
+          </div>
+
+          <div class="panel card card--scissors">
+            <canvas class="card-icon" data-type="scissors" width="96" height="96"></canvas>
+            <div class="num card-name">TESOURA</div>
+            <div class="stepper">
+              <button class="btn step" data-bump="scissors" data-delta="-5" type="button">-</button>
+              <div class="num card-count" id="cfg-scissors">030</div>
+              <button class="btn step" data-bump="scissors" data-delta="5" type="button">+</button>
+            </div>
+            <div class="label">PORTAL LESTE</div>
+          </div>
+        </div>
+
+        <div class="panel speed-panel">
+          <div class="speed-head">
+            <span class="label">VELOCIDADE BASE</span>
+            <span class="num" id="cfg-speed">05</span>
+          </div>
+          <div class="speed-cells" id="speed-cells"></div>
+        </div>
+
+        <button class="btn-primary btn-start" id="btn-start" type="button">
+          INICIAR BATALHA
+        </button>
+
+        <div class="history-block">
+          <div class="label">HISTÓRICO</div>
+          <div class="history" id="history-config"></div>
+        </div>
+      </section>
+
+      <!-- ============ 2. ARENA ============ -->
+      <section id="screen-arena" class="hidden">
+        <header class="scoreboard-head">
+          <span class="label">PLACAR TRINÁRIO</span>
+          <span class="num" id="clock-top">T+00:00</span>
+        </header>
+
+        <div class="scoreboard">
+          <div class="seg seg--paper" id="seg-paper"><span id="segn-paper">030</span></div>
+          <div class="seg seg--rock" id="seg-rock"><span id="segn-rock">030</span></div>
+          <div class="seg seg--scissors" id="seg-scissors"><span id="segn-scissors">030</span></div>
+        </div>
+
+        <div class="layout">
+          <aside class="col col--left">
+            <div>
+              <div class="label">REGRAS</div>
+              <ul class="rules">
+                <li>PAPEL &gt; PEDRA</li>
+                <li>PEDRA &gt; TESOURA</li>
+                <li>TESOURA &gt; PAPEL</li>
+              </ul>
+            </div>
+            <div>
+              <div class="label">CONVERSÕES</div>
+              <div class="num accent" id="conversions">0000</div>
+            </div>
+          </aside>
+
+          <div class="arena-wrap">
+            <canvas id="arena"></canvas>
+          </div>
+
+          <aside class="col col--right">
+            <div class="panel">
+              <div class="label">POPULAÇÃO VIVA</div>
+              <div class="stat stat--paper">
+                <span>PAPEL</span><span class="num" id="count-paper">030</span>
+              </div>
+              <div class="stat stat--rock">
+                <span>PEDRA</span><span class="num" id="count-rock">030</span>
+              </div>
+              <div class="stat stat--scissors">
+                <span>TESOURA</span><span class="num" id="count-scissors">030</span>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="label">TEMPO DECORRIDO</div>
+              <div class="num clock" id="clock">T+00:00</div>
+            </div>
+
+            <div class="panel">
+              <div class="label">VELOCIDADE</div>
+              <div class="speed-row">
+                <button class="btn speed-btn" data-speed="1" type="button">1X</button>
+                <button class="btn speed-btn" data-speed="2" type="button">2X</button>
+                <button class="btn speed-btn" data-speed="4" type="button">4X</button>
+              </div>
+            </div>
+
+            <button class="btn btn-pause" id="btn-pause" type="button">PAUSAR</button>
+            <button class="btn btn-ghost" id="btn-restart" type="button">REINICIAR</button>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ============ 3. FIM DE PARTIDA ============ -->
+      <section id="screen-end" class="hidden">
+        <div class="end-head">
+          <canvas id="winner-icon" width="224" height="224"></canvas>
+          <div class="end-info">
+            <div class="label">FIM DE PARTIDA</div>
+            <div class="num end-title" id="winner-name">PAPEL VENCE</div>
+            <div class="end-stats">
+              <div>
+                <div class="label">TEMPO TOTAL</div>
+                <div class="num end-stat" id="end-time">T+00:00</div>
+              </div>
+              <div>
+                <div class="label">CONVERSÕES</div>
+                <div class="num end-stat accent" id="end-conversions">0000</div>
+              </div>
+              <div>
+                <div class="label">SETUP INICIAL</div>
+                <div class="num end-stat" id="end-setup">30/30/30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="label">EVOLUÇÃO DAS POPULAÇÕES</div>
+          <div class="chart" id="chart"></div>
+        </div>
+
+        <div class="end-actions">
+          <button class="btn-primary" id="btn-again" type="button">JOGAR DE NOVO</button>
+          <button class="btn btn-ghost" id="btn-adjust" type="button">AJUSTAR PARÂMETROS</button>
+        </div>
+
+        <div class="history-block">
+          <div class="label">HISTÓRICO</div>
+          <div class="history" id="history-end"></div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
