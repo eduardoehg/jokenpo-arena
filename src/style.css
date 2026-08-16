@@ -497,7 +497,17 @@ body {
   flex-wrap: wrap;
   gap: 48px;
   align-items: center;
-  margin-top: 24px;
+}
+
+/*
+ * Aqui o seletor divide a faixa com o bloco do vencedor, mas ancorado no topo.
+ *
+ * Centralizar como nas outras telas jogaria os botões para o meio de um bloco
+ * alto (sprite de 168px, título, estatísticas e o botão de copiar link), longe
+ * de qualquer coisa com que se alinhar.
+ */
+.end-head > .lang-switch {
+  align-self: flex-start;
 }
 
 #winner-icon {

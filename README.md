@@ -118,12 +118,12 @@ uma arena inválida.
 - **`prefers-reduced-motion`** desliga flash, explosão e hit-stop; a simulação
   segue, porque ela é o conteúdo e não um efeito
 - Alvos de toque de 44px nos steppers e botões
-- Som ligado por padrão, com botão para silenciar e escolha lembrada
+- Som ligado por padrão, com botão para silenciar e a escolha lembrada
 
 ## Idiomas
 
-Português e inglês, alternáveis no gabinete. Entra em inglês por padrão, e a
-escolha do visitante é lembrada.
+Português e inglês, alternáveis no gabinete. Toda visita começa em inglês — a
+troca vale para a sessão, e o link abre exatamente igual para todo mundo.
 
 Os valores de `EntityType` são IDs internos neutros (`rock`, `paper`,
 `scissors`) — nenhuma camada abaixo de `ui/` conhece texto de tela. O dicionário
