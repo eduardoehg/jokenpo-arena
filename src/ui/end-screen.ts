@@ -4,7 +4,7 @@ import { renderIcon } from '../render/sprites';
 import { byId } from './dom';
 import { formatClock, pad } from './format';
 import { formatSetup } from './history';
-import { TYPE_LABELS } from './labels';
+import { t, typeLabel } from './i18n';
 import { segmentLayout } from './scoreboard';
 import { CHART_COLUMNS, resample, type Sample } from './timeline';
 
@@ -63,7 +63,7 @@ export function createEndScreen(handlers: EndHandlers): EndScreen {
     show(result) {
       renderIcon(icon, result.winner, TYPE_COLORS[result.winner]);
 
-      name.textContent = `${TYPE_LABELS[result.winner]}\nVENCE`;
+      name.textContent = `${typeLabel(result.winner)}\n${t('wins')}`;
       name.style.color = TYPE_COLORS[result.winner];
 
       time.textContent = formatClock(result.elapsed);

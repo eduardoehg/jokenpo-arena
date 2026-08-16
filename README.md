@@ -7,7 +7,8 @@ até restar um único tipo.
 **[▶ Demo ao vivo](https://eduardoehg.github.io/jokenpo-arena/)** ·
 [![CI](https://github.com/eduardoehg/jokenpo-arena/actions/workflows/ci.yml/badge.svg)](https://github.com/eduardoehg/jokenpo-arena/actions/workflows/ci.yml)
 
-TypeScript puro, sem framework e sem engine de jogo. 209 testes.
+TypeScript puro, sem framework e sem engine de jogo. Português e inglês.
+226 testes.
 
 ---
 
@@ -88,13 +89,23 @@ os números correm dentro deles. Quando um tipo cai abaixo de 13%, seu número
 salta para fora da barra e assume a cor do tipo — a população moribunda nunca
 some da leitura.
 
+## Idiomas
+
+Português e inglês, alternáveis no gabinete. O idioma inicial vem da
+preferência do navegador e a escolha manual é lembrada.
+
+Os valores de `EntityType` são IDs internos neutros (`rock`, `paper`,
+`scissors`) — nenhuma camada abaixo de `ui/` conhece texto de tela. O dicionário
+português é a fonte das chaves, e o inglês é tipado a partir dele: **esquecer
+uma tradução é erro de compilação**, não rótulo vazio em produção.
+
 ## Rodando
 
 ```bash
 npm install
 npm run dev        # servidor local
 npm run build      # build de produção
-npm test           # 209 testes
+npm test           # 226 testes
 npm run typecheck  # tsc --noEmit
 ```
 
