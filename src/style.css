@@ -595,6 +595,22 @@ body {
   width: 90px;
 }
 
+/*
+ * Movimento reduzido: some com as transições.
+ *
+ * O salto do número no Placar Trinário continua acontecendo — ele carrega
+ * informação, não é enfeite. O que sai é a animação entre os dois estados.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
 @media (max-width: 900px) {
   .cabinet {
     padding: 18px;

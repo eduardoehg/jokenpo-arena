@@ -23,6 +23,7 @@ import { createEndScreen, type MatchResult } from './ui/end-screen';
 import { pushMatch, type MatchRecord } from './ui/history';
 import { detectLanguage, setLanguage } from './ui/i18n';
 import { createLanguageSwitch } from './ui/language-switch';
+import { createMotionPreference } from './ui/motion';
 import { loadHistory, loadLanguage, saveHistory } from './ui/preferences';
 import { renderHistory } from './ui/history-list';
 import { createHud } from './ui/hud';
@@ -87,6 +88,8 @@ function arenaContext(): CanvasRenderingContext2D {
  */
 const browserLanguages = navigator.languages ?? [navigator.language];
 setLanguage(loadLanguage() ?? detectLanguage(browserLanguages));
+
+const motion = createMotionPreference();
 
 const ctx = arenaContext();
 const screens = createScreens('config');
@@ -252,6 +255,10 @@ function simulate(dt: number): void {
 
     state = tick(state, SUBSTEP);
     if (state.conversions.length === 0) continue;
+
+    // Movimento reduzido: nada de flash, explosão ou congelamento. A partida
+    // continua correndo — ela é o conteúdo, não um efeito.
+    if (motion.reduced()) continue;
 
     pushConversions(effects, state.conversions);
 
