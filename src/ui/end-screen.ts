@@ -1,3 +1,4 @@
+import { formatSeed, type Seed } from '../core/rng';
 import type { EntityType } from '../core/rules';
 import { TYPE_COLORS } from '../render/palette';
 import { renderIcon } from '../render/sprites';
@@ -13,12 +14,15 @@ export interface MatchResult {
   elapsed: number;
   conversions: number;
   setup: Record<EntityType, number>;
+  seed: Seed;
   samples: readonly Sample[];
 }
 
 export interface EndHandlers {
   onAgain(): void;
   onAdjust(): void;
+  /** Devolve a URL que reproduz a partida recém-encerrada. */
+  shareUrl(): string;
 }
 
 export interface EndScreen {
@@ -49,18 +53,55 @@ function renderChart(samples: readonly Sample[]): void {
   byId('chart').replaceChildren(...columns);
 }
 
+/** Quanto tempo o botão de compartilhar mostra a confirmação. */
+const COPIED_FEEDBACK_MS = 1800;
+
 export function createEndScreen(handlers: EndHandlers): EndScreen {
   const icon = byId<HTMLCanvasElement>('winner-icon');
   const name = byId('winner-name');
   const time = byId('end-time');
   const conversions = byId('end-conversions');
   const setup = byId('end-setup');
+  const seedValue = byId('end-seed');
+  const share = byId<HTMLButtonElement>('btn-share');
+
+  let copiedTimer: ReturnType<typeof setTimeout> | undefined;
 
   byId('btn-again').addEventListener('click', () => handlers.onAgain());
   byId('btn-adjust').addEventListener('click', () => handlers.onAdjust());
 
+  share.addEventListener('click', () => {
+    void copyShareUrl();
+  });
+
+  /**
+   * Copia o link da partida.
+   *
+   * A API de clipboard exige contexto seguro e gesto do usuário — o clique
+   * atende ao segundo, mas em `http://` sem TLS ela simplesmente não existe.
+   * Nesse caso o rótulo não muda, para não mentir que copiou.
+   */
+  async function copyShareUrl(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(handlers.shareUrl());
+    } catch {
+      return;
+    }
+
+    clearTimeout(copiedTimer);
+    share.textContent = t('linkCopied');
+    copiedTimer = setTimeout(() => {
+      share.textContent = t('copyLink');
+    }, COPIED_FEEDBACK_MS);
+  }
+
   return {
     show(result) {
+      // Cancela a confirmação pendente: o link agora é de outra partida.
+      clearTimeout(copiedTimer);
+      share.textContent = t('copyLink');
+      seedValue.textContent = formatSeed(result.seed);
+
       renderIcon(icon, result.winner, TYPE_COLORS[result.winner]);
 
       name.textContent = `${typeLabel(result.winner)}\n${t('wins')}`;

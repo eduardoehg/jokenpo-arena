@@ -1,3 +1,4 @@
+import { formatSeed, type Seed } from '../core/rng';
 import { ENTITY_TYPES, type EntityType } from '../core/rules';
 import { TYPE_COLORS } from '../render/palette';
 import { renderIcon } from '../render/sprites';
@@ -13,11 +14,12 @@ import {
 export interface ConfigHandlers {
   onBump(type: EntityType, delta: number): void;
   onSpeedLevel(level: number): void;
+  onNewSeed(): void;
   onStart(): void;
 }
 
 export interface ConfigScreen {
-  sync(config: MatchConfig): void;
+  sync(config: MatchConfig, seed: Seed): void;
   /** Reescreve os rótulos que carregam número junto, após troca de idioma. */
   refreshLabels(): void;
 }
@@ -35,7 +37,10 @@ export function createConfigScreen(handlers: ConfigHandlers): ConfigScreen {
   }));
 
   const speedValue = byId('cfg-speed');
+  const seedValue = byId('cfg-seed');
   const speedCells = buildSpeedCells(handlers);
+
+  byId('btn-new-seed').addEventListener('click', () => handlers.onNewSeed());
 
   for (const canvas of byClass<HTMLCanvasElement>('.card-icon')) {
     const type = canvas.dataset.type as EntityType | undefined;
@@ -53,12 +58,13 @@ export function createConfigScreen(handlers: ConfigHandlers): ConfigScreen {
   byId('btn-start').addEventListener('click', () => handlers.onStart());
 
   return {
-    sync(config) {
+    sync(config, seed) {
       for (const counter of counters) {
         counter.element.textContent = pad(config.counts[counter.type]);
       }
 
       speedValue.textContent = pad(config.speedLevel, 2);
+      seedValue.textContent = formatSeed(seed);
 
       for (let i = 0; i < speedCells.length; i++) {
         speedCells[i].classList.toggle('lit', i < config.speedLevel);

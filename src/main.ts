@@ -6,6 +6,7 @@ import '@fontsource/ibm-plex-mono/latin-600.css';
 import './style.css';
 
 import type { Arena } from './core/physics';
+import { mulberry32, randomSeed, type Seed } from './core/rng';
 import type { EntityType } from './core/rules';
 import { countByType, createSimulation, tick } from './core/simulation';
 import { syncCanvasSize } from './render/canvas';
@@ -31,6 +32,7 @@ import {
   setSpeedLevel,
   toSpawnConfig,
 } from './ui/match-config';
+import { encodeMatch, readSharedMatch } from './ui/match-url';
 import { createScoreboard } from './ui/scoreboard';
 import { createScreens } from './ui/screens';
 import { createTimeline, sampleTimeline } from './ui/timeline';
@@ -91,12 +93,26 @@ const screens = createScreens('config');
 const hud = createHud();
 const scoreboard = createScoreboard();
 
-let matchConfig = defaultMatchConfig();
+/**
+ * Partida vinda de um link compartilhado, se houver.
+ *
+ * Sem link válido, sorteia-se uma seed e a configuração fica no padrão. É o
+ * único ponto não determinístico: dali em diante a partida inteira decorre da
+ * seed.
+ */
+const shared = readSharedMatch(window.location.search);
 
-/** Populações com que a partida corrente começou, para o resumo do fim. */
+let matchConfig = shared.config ?? defaultMatchConfig();
+let seed: Seed = shared.seed;
+
+/** Populações e seed com que a partida corrente começou, para o resumo. */
 let setup = { ...matchConfig.counts };
+let matchSeed = seed;
 
-let state = createSimulation(toSpawnConfig(matchConfig, ARENA));
+let state = createSimulation(
+  toSpawnConfig(matchConfig, ARENA),
+  mulberry32(seed),
+);
 let effects = createEffects(state.entities.length);
 let timeline = createTimeline(countByType(state.entities));
 let history: MatchRecord[] = [];
@@ -111,9 +127,25 @@ let hitStop = 0;
 let sinceHitStop = HIT_STOP_COOLDOWN;
 let lastFrame = performance.now();
 
-function startMatch(): void {
+/**
+ * Começa uma partida com a seed corrente, ou com a que for passada.
+ *
+ * A URL é reescrita com `replaceState` para que a barra de endereço sempre
+ * descreva a partida em curso — compartilhar vira copiar o endereço, e o
+ * histórico do navegador não fica poluído com uma entrada por partida.
+ */
+function startMatch(nextSeed?: Seed): void {
+  if (nextSeed !== undefined) seed = nextSeed;
+
   setup = { ...matchConfig.counts };
-  state = createSimulation(toSpawnConfig(matchConfig, ARENA));
+  matchSeed = seed;
+
+  window.history.replaceState(null, '', encodeMatch(matchConfig, seed));
+
+  state = createSimulation(
+    toSpawnConfig(matchConfig, ARENA),
+    mulberry32(seed),
+  );
   effects = createEffects(state.entities.length);
   timeline = createTimeline(countByType(state.entities));
 
@@ -133,6 +165,7 @@ function finishMatch(winner: EntityType): void {
     elapsed: state.elapsed,
     conversions: state.totalConversions,
     setup,
+    seed: matchSeed,
   };
 
   history = pushMatch(history, result);
@@ -152,6 +185,7 @@ function finishMatch(winner: EntityType): void {
  */
 function refreshLanguage(): void {
   languageSwitch.apply();
+  configScreen.sync(matchConfig, seed);
   configScreen.refreshLabels();
   controls.setPaused(paused);
   renderHistory(history);
@@ -161,20 +195,32 @@ function refreshLanguage(): void {
 const configScreen = createConfigScreen({
   onBump(type, delta) {
     matchConfig = bumpPopulation(matchConfig, type, delta);
-    configScreen.sync(matchConfig);
+    configScreen.sync(matchConfig, seed);
   },
 
   onSpeedLevel(level) {
     matchConfig = setSpeedLevel(matchConfig, level);
-    configScreen.sync(matchConfig);
+    configScreen.sync(matchConfig, seed);
   },
 
-  onStart: startMatch,
+  onNewSeed() {
+    seed = randomSeed();
+    configScreen.sync(matchConfig, seed);
+  },
+
+  onStart: () => startMatch(),
 });
 
 const endScreen = createEndScreen({
-  onAgain: startMatch,
-  onAdjust: () => screens.show('config'),
+  // Partida nova pede seed nova; para repetir a mesma, o link continua valendo.
+  onAgain: () => startMatch(randomSeed()),
+
+  onAdjust() {
+    configScreen.sync(matchConfig, seed);
+    screens.show('config');
+  },
+
+  shareUrl: () => window.location.href,
 });
 
 const languageSwitch = createLanguageSwitch(refreshLanguage);
@@ -190,7 +236,8 @@ const controls = createControls({
     controls.setPaused(paused);
   },
 
-  onRestart: startMatch,
+  // Reiniciar repete a mesma seed: é a mesma partida de novo, do zero.
+  onRestart: () => startMatch(),
 });
 
 /** Avança a simulação em passos fixos, consumindo o tempo do quadro. */
@@ -251,7 +298,7 @@ function frame(now: number): void {
 }
 
 languageSwitch.apply();
-configScreen.sync(matchConfig);
+configScreen.sync(matchConfig, seed);
 controls.setSpeed(speed);
 controls.setPaused(paused);
 renderHistory(history);

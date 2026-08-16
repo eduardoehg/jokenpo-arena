@@ -419,6 +419,45 @@ body {
   background: var(--magenta);
 }
 
+.seed-panel {
+  margin-top: 20px;
+}
+
+.seed-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.seed-hint {
+  color: var(--dim);
+}
+
+.seed-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.seed-value {
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  color: var(--magenta);
+}
+
+.seed-new {
+  padding: 10px 18px;
+  font-size: 10px;
+}
+
+.btn-share {
+  margin-top: 28px;
+  padding: 14px 20px;
+  font-size: 11px;
+}
+
 .btn-start {
   width: 100%;
   margin-top: 28px;

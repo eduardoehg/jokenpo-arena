@@ -33,6 +33,12 @@ const PT = {
   startBattle: 'INICIAR BATALHA',
   history: 'HISTÓRICO',
 
+  seed: 'SEED',
+  newSeed: 'NOVA',
+  seedHint: 'MESMA SEED, MESMA PARTIDA',
+  copyLink: 'COPIAR LINK',
+  linkCopied: 'COPIADO',
+
   scoreboard: 'PLACAR TRINÁRIO',
   rules: 'REGRAS',
   rulePaper: 'PAPEL > PEDRA',
@@ -72,6 +78,12 @@ const EN: Record<MessageKey, string> = {
   speedLevel: 'Speed',
   startBattle: 'START BATTLE',
   history: 'HISTORY',
+
+  seed: 'SEED',
+  newSeed: 'NEW',
+  seedHint: 'SAME SEED, SAME MATCH',
+  copyLink: 'COPY LINK',
+  linkCopied: 'COPIED',
 
   scoreboard: 'TRINARY SCOREBOARD',
   rules: 'RULES',

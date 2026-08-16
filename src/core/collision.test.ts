@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mulberry32 } from '../test/prng';
+import { mulberry32 } from './rng';
 import {
   buildGrid,
   cellSizeFor,
