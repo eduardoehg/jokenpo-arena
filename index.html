@@ -60,6 +60,17 @@
           <div class="speed-cells" id="speed-cells"></div>
         </div>
 
+        <div class="panel seed-panel">
+          <div class="seed-head">
+            <span class="label" data-i18n="seed"></span>
+            <span class="label seed-hint" data-i18n="seedHint"></span>
+          </div>
+          <div class="seed-row">
+            <span class="num seed-value" id="cfg-seed">000000</span>
+            <button class="btn btn-ghost seed-new" id="btn-new-seed" type="button" data-i18n="newSeed"></button>
+          </div>
+        </div>
+
         <button class="btn-primary btn-start" id="btn-start" type="button" data-i18n="startBattle"></button>
 
         <div class="history-block">
@@ -130,6 +141,7 @@
             </div>
 
             <button class="btn btn-pause" id="btn-pause" type="button">PAUSAR</button>
+            <button class="btn btn-ghost" id="btn-sound" type="button"></button>
             <button class="btn btn-ghost" id="btn-restart" type="button" data-i18n="restart"></button>
           </aside>
         </div>
@@ -155,7 +167,13 @@
                 <div class="label" data-i18n="initialSetup"></div>
                 <div class="num end-stat" id="end-setup">30/30/30</div>
               </div>
+              <div>
+                <div class="label" data-i18n="seed"></div>
+                <div class="num end-stat" id="end-seed">000000</div>
+              </div>
             </div>
+
+            <button class="btn btn-ghost btn-share" id="btn-share" type="button" data-i18n="copyLink"></button>
           </div>
         </div>
 

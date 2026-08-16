@@ -3,6 +3,7 @@ import type { EntityType } from '../core/rules';
 import {
   formatSetup,
   HISTORY_LIMIT,
+  parseHistory,
   pushMatch,
   type MatchRecord,
 } from './history';
@@ -69,6 +70,65 @@ describe('pushMatch', () => {
       conversions: 1424,
       setup: { paper: 20, rock: 45, scissors: 10 },
     });
+  });
+});
+
+describe('parseHistory', () => {
+  const valid = (): MatchRecord => ({
+    number: 3,
+    winner: 'rock',
+    elapsed: 84.5,
+    conversions: 1424,
+    setup: { paper: 20, rock: 45, scissors: 10 },
+  });
+
+  it('aceita histórico bem formado, na ordem', () => {
+    const history = [valid(), { ...valid(), number: 2, winner: 'paper' as const }];
+
+    expect(parseHistory(history)).toEqual(history);
+  });
+
+  it('faz a volta completa por JSON', () => {
+    const history = [valid()];
+
+    expect(parseHistory(JSON.parse(JSON.stringify(history)))).toEqual(history);
+  });
+
+  it('devolve vazio para qualquer coisa que não seja lista', () => {
+    for (const value of [null, undefined, 42, 'texto', {}, true]) {
+      expect(parseHistory(value)).toEqual([]);
+    }
+  });
+
+  it('descarta só o registro estragado, preservando os bons', () => {
+    const parsed = parseHistory([valid(), { winner: 'rock' }, null, valid()]);
+
+    expect(parsed).toHaveLength(2);
+  });
+
+  it('rejeita vencedor que não é um tipo do jogo', () => {
+    expect(parseHistory([{ ...valid(), winner: 'lizard' }])).toEqual([]);
+    expect(parseHistory([{ ...valid(), winner: 3 }])).toEqual([]);
+  });
+
+  it('rejeita campo numérico ausente, textual ou NaN', () => {
+    for (const field of ['number', 'elapsed', 'conversions']) {
+      expect(parseHistory([{ ...valid(), [field]: undefined }])).toEqual([]);
+      expect(parseHistory([{ ...valid(), [field]: '10' }])).toEqual([]);
+      expect(parseHistory([{ ...valid(), [field]: Number.NaN }])).toEqual([]);
+    }
+  });
+
+  it('rejeita setup incompleto ou malformado', () => {
+    expect(parseHistory([{ ...valid(), setup: { paper: 30, rock: 30 } }])).toEqual([]);
+    expect(parseHistory([{ ...valid(), setup: null }])).toEqual([]);
+    expect(parseHistory([{ ...valid(), setup: 'x' }])).toEqual([]);
+  });
+
+  it('trunca no limite mesmo se o armazenamento tiver mais', () => {
+    const many = Array.from({ length: 30 }, () => valid());
+
+    expect(parseHistory(many)).toHaveLength(HISTORY_LIMIT);
   });
 });
 

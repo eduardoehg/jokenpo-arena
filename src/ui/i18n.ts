@@ -33,6 +33,12 @@ const PT = {
   startBattle: 'INICIAR BATALHA',
   history: 'HISTÓRICO',
 
+  seed: 'SEED',
+  newSeed: 'NOVA',
+  seedHint: 'MESMA SEED, MESMA PARTIDA',
+  copyLink: 'COPIAR LINK',
+  linkCopied: 'COPIADO',
+
   scoreboard: 'PLACAR TRINÁRIO',
   rules: 'REGRAS',
   rulePaper: 'PAPEL > PEDRA',
@@ -45,6 +51,8 @@ const PT = {
   pause: 'PAUSAR',
   resume: 'CONTINUAR',
   restart: 'REINICIAR',
+  soundOn: 'SOM LIGADO',
+  soundOff: 'SOM MUDO',
 
   matchOver: 'FIM DE PARTIDA',
   wins: 'VENCE',
@@ -73,6 +81,12 @@ const EN: Record<MessageKey, string> = {
   startBattle: 'START BATTLE',
   history: 'HISTORY',
 
+  seed: 'SEED',
+  newSeed: 'NEW',
+  seedHint: 'SAME SEED, SAME MATCH',
+  copyLink: 'COPY LINK',
+  linkCopied: 'COPIED',
+
   scoreboard: 'TRINARY SCOREBOARD',
   rules: 'RULES',
   rulePaper: 'PAPER > ROCK',
@@ -85,6 +99,8 @@ const EN: Record<MessageKey, string> = {
   pause: 'PAUSE',
   resume: 'RESUME',
   restart: 'RESTART',
+  soundOn: 'SOUND ON',
+  soundOff: 'MUTED',
 
   matchOver: 'MATCH OVER',
   wins: 'WINS',

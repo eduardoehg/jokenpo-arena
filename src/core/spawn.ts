@@ -30,6 +30,14 @@ export const DEFAULT_PORTAL_SPAN = 0.34;
 /** Dispersão angular padrão em torno da direção para dentro, em radianos. */
 export const DEFAULT_SPREAD = 0.7;
 
+/**
+ * Variação de velocidade por peça: ±30% em torno da base.
+ *
+ * Sem ela as três ondas avançam em bloco e se encontram numa frente reta. Com
+ * ela a formação se desfaz sozinha e a mistura acontece mais cedo.
+ */
+export const DEFAULT_SPEED_JITTER = 0.3;
+
 /** Fração da menor dimensão da arena usada como profundidade da faixa. */
 const DEFAULT_BAND_FRACTION = 0.1;
 
@@ -54,6 +62,8 @@ export interface SpawnConfig {
   portalSpan?: number;
   /** Dispersão angular em torno da direção para dentro, em radianos. */
   spread?: number;
+  /** Variação relativa da velocidade por peça, de 0 (nenhuma) a 1. */
+  speedJitter?: number;
   edges?: Record<EntityType, Edge>;
 }
 
@@ -130,8 +140,9 @@ function placeOnEdge(
  * `±spread`. É o que faz as peças jorrarem do portal em vez de metade delas
  * começar quicando na parede de trás.
  *
- * Consome exatamente três valores de `rng` por entidade, sempre na mesma ordem
- * (along, depth, ângulo): a mesma sequência produz sempre o mesmo spawn.
+ * Consome exatamente quatro valores de `rng` por entidade, sempre na mesma
+ * ordem (along, depth, ângulo, velocidade): a mesma sequência produz sempre o
+ * mesmo spawn.
  */
 export function spawnEntities(
   config: SpawnConfig,
@@ -141,6 +152,7 @@ export function spawnEntities(
   const radius = config.radius ?? DEFAULT_RADIUS;
   const edges = config.edges ?? SPAWN_EDGES;
   const spread = config.spread ?? DEFAULT_SPREAD;
+  const jitter = config.speedJitter ?? DEFAULT_SPEED_JITTER;
   const portalSpan = config.portalSpan ?? DEFAULT_PORTAL_SPAN;
   const bandDepth =
     config.bandDepth ??
@@ -156,6 +168,7 @@ export function spawnEntities(
       const alongT = rng();
       const depthT = rng();
       const angle = inward + (rng() - 0.5) * 2 * spread;
+      const pace = speed * (1 + (rng() - 0.5) * 2 * jitter);
 
       const { x, y } = placeOnEdge(
         edge,
@@ -171,8 +184,8 @@ export function spawnEntities(
         createEntity({
           x,
           y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
+          vx: Math.cos(angle) * pace,
+          vy: Math.sin(angle) * pace,
           type,
           radius,
         }),

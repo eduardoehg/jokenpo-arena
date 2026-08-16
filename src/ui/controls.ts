@@ -9,6 +9,7 @@ export type SpeedStep = (typeof SPEED_STEPS)[number];
 export interface ControlHandlers {
   onSpeedChange(speed: SpeedStep): void;
   onPauseToggle(): void;
+  onSoundToggle(): void;
   onRestart(): void;
 }
 
@@ -17,6 +18,8 @@ export interface Controls {
   setSpeed(speed: SpeedStep): void;
   /** Reflete o estado de pausa no botão. */
   setPaused(paused: boolean): void;
+  /** Reflete o estado do som no botão. */
+  setSound(enabled: boolean): void;
 }
 
 /**
@@ -28,6 +31,7 @@ export interface Controls {
 export function createControls(handlers: ControlHandlers): Controls {
   const speedButtons = byClass<HTMLButtonElement>('.speed-btn');
   const pauseButton = byId<HTMLButtonElement>('btn-pause');
+  const soundButton = byId<HTMLButtonElement>('btn-sound');
   const restartButton = byId<HTMLButtonElement>('btn-restart');
 
   for (const button of speedButtons) {
@@ -39,6 +43,7 @@ export function createControls(handlers: ControlHandlers): Controls {
   }
 
   pauseButton.addEventListener('click', () => handlers.onPauseToggle());
+  soundButton.addEventListener('click', () => handlers.onSoundToggle());
   restartButton.addEventListener('click', () => handlers.onRestart());
 
   return {
@@ -53,6 +58,12 @@ export function createControls(handlers: ControlHandlers): Controls {
       // daria conta e a troca de idioma precisa passar por aqui de novo.
       pauseButton.textContent = paused ? t('resume') : t('pause');
       pauseButton.classList.toggle('resumed', paused);
+    },
+
+    setSound(enabled) {
+      soundButton.textContent = enabled ? t('soundOn') : t('soundOff');
+      soundButton.classList.toggle('muted', !enabled);
+      soundButton.setAttribute('aria-pressed', String(enabled));
     },
   };
 }
