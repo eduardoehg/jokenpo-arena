@@ -23,7 +23,7 @@ import { createEndScreen, type MatchResult } from './ui/end-screen';
 import { pushMatch, type MatchRecord } from './ui/history';
 import { detectLanguage, setLanguage } from './ui/i18n';
 import { createLanguageSwitch } from './ui/language-switch';
-import { loadLanguage } from './ui/preferences';
+import { loadHistory, loadLanguage, saveHistory } from './ui/preferences';
 import { renderHistory } from './ui/history-list';
 import { createHud } from './ui/hud';
 import {
@@ -115,7 +115,7 @@ let state = createSimulation(
 );
 let effects = createEffects(state.entities.length);
 let timeline = createTimeline(countByType(state.entities));
-let history: MatchRecord[] = [];
+let history: MatchRecord[] = loadHistory();
 
 /** Última partida encerrada, para redesenhar a tela de fim ao trocar idioma. */
 let lastResult: MatchResult | null = null;
@@ -169,6 +169,7 @@ function finishMatch(winner: EntityType): void {
   };
 
   history = pushMatch(history, result);
+  saveHistory(history);
   renderHistory(history);
 
   lastResult = { ...result, samples: timeline.samples };
