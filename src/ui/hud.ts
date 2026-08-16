@@ -21,8 +21,7 @@ export function createHud(): Hud {
   }));
 
   const clock = byId('clock');
-  const clockTop = byId('clock-top');
-  const conversions = byId('conversions');
+  const battles = byId('battles');
 
   const write = (element: HTMLElement, text: string): void => {
     if (element.textContent !== text) element.textContent = text;
@@ -35,10 +34,8 @@ export function createHud(): Hud {
         write(counter.element, pad(counts[counter.type]));
       }
 
-      const time = formatClock(state.elapsed);
-      write(clock, time);
-      write(clockTop, time);
-      write(conversions, pad(state.totalConversions, 4));
+      write(clock, formatClock(state.elapsed));
+      write(battles, pad(state.totalConversions, 4));
     },
   };
 }

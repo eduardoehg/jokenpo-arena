@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ENTITY_TYPES } from '../core/rules';
 import {
-  detectLanguage,
-  FALLBACK_LANGUAGE,
+  DEFAULT_LANGUAGE,
   HTML_LANG,
   isLanguage,
   language,
@@ -67,31 +66,13 @@ describe('translate', () => {
   });
 });
 
-describe('detectLanguage', () => {
-  it('reconhece as variantes regionais do português', () => {
-    expect(detectLanguage(['pt-BR'])).toBe('pt');
-    expect(detectLanguage(['pt-PT'])).toBe('pt');
-    expect(detectLanguage(['pt'])).toBe('pt');
-    expect(detectLanguage(['PT-br'])).toBe('pt');
+describe('idioma padrão', () => {
+  it('é o inglês', () => {
+    expect(DEFAULT_LANGUAGE).toBe('en');
   });
 
-  it('reconhece as variantes do inglês', () => {
-    expect(detectLanguage(['en-US'])).toBe('en');
-    expect(detectLanguage(['en-GB'])).toBe('en');
-  });
-
-  it('respeita a ordem de prioridade do navegador', () => {
-    expect(detectLanguage(['en-US', 'pt-BR'])).toBe('en');
-    expect(detectLanguage(['pt-BR', 'en-US'])).toBe('pt');
-  });
-
-  it('ignora idiomas que não temos e segue procurando', () => {
-    expect(detectLanguage(['fr-FR', 'de-DE', 'pt-BR'])).toBe('pt');
-  });
-
-  it('cai no inglês quando nenhum idioma serve', () => {
-    expect(detectLanguage(['fr-FR', 'ja'])).toBe(FALLBACK_LANGUAGE);
-    expect(detectLanguage([])).toBe(FALLBACK_LANGUAGE);
+  it('é um dos idiomas suportados', () => {
+    expect(LANGUAGES).toContain(DEFAULT_LANGUAGE);
   });
 });
 

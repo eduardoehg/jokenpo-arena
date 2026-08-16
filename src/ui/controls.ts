@@ -11,6 +11,7 @@ export interface ControlHandlers {
   onPauseToggle(): void;
   onSoundToggle(): void;
   onRestart(): void;
+  onHome(): void;
 }
 
 export interface Controls {
@@ -33,6 +34,7 @@ export function createControls(handlers: ControlHandlers): Controls {
   const pauseButton = byId<HTMLButtonElement>('btn-pause');
   const soundButton = byId<HTMLButtonElement>('btn-sound');
   const restartButton = byId<HTMLButtonElement>('btn-restart');
+  const homeButton = byId<HTMLButtonElement>('btn-home');
 
   for (const button of speedButtons) {
     button.addEventListener('click', () => {
@@ -45,6 +47,7 @@ export function createControls(handlers: ControlHandlers): Controls {
   pauseButton.addEventListener('click', () => handlers.onPauseToggle());
   soundButton.addEventListener('click', () => handlers.onSoundToggle());
   restartButton.addEventListener('click', () => handlers.onRestart());
+  homeButton.addEventListener('click', () => handlers.onHome());
 
   return {
     setSpeed(speed) {
