@@ -20,7 +20,8 @@ export interface MatchResult {
 
 export interface EndHandlers {
   onAgain(): void;
-  onAdjust(): void;
+  /** Volta para a tela inicial, onde os parâmetros são ajustados. */
+  onHome(): void;
   /** Devolve a URL que reproduz a partida recém-encerrada. */
   shareUrl(): string;
 }
@@ -68,7 +69,7 @@ export function createEndScreen(handlers: EndHandlers): EndScreen {
   let copiedTimer: ReturnType<typeof setTimeout> | undefined;
 
   byId('btn-again').addEventListener('click', () => handlers.onAgain());
-  byId('btn-adjust').addEventListener('click', () => handlers.onAdjust());
+  byId('btn-end-home').addEventListener('click', () => handlers.onHome());
 
   share.addEventListener('click', () => {
     void copyShareUrl();

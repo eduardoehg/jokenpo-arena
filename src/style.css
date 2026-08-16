@@ -577,8 +577,10 @@ body {
   font-size: 18px;
 }
 
+/* Base menor que a anterior: o rótulo encurtou de AJUSTAR PARÂMETROS para
+   INÍCIO, e os 280px de antes deixariam o botão vazio. */
 .end-actions .btn-ghost {
-  flex: 0 1 280px;
+  flex: 0 1 180px;
 }
 
 /* ---------- histórico ---------- */

@@ -233,7 +233,7 @@ const endScreen = createEndScreen({
   // Partida nova pede seed nova; para repetir a mesma, o link continua valendo.
   onAgain: () => startMatch(randomSeed()),
 
-  onAdjust() {
+  onHome() {
     configScreen.sync(matchConfig, seed);
     screens.show('config');
   },
