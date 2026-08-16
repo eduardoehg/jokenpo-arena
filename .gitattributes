@@ -1,0 +1,11 @@
+# Normaliza a quebra de linha no repositório, independente do SO de quem
+# clona. Sem isto, um checkout no Windows e outro no Linux produzem diffs
+# inteiros só de fim de linha.
+* text=auto eol=lf
+
+# Binários: nunca converter.
+*.png binary
+*.jpg binary
+*.gif binary
+*.woff binary
+*.woff2 binary
