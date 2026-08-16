@@ -8,7 +8,7 @@ até restar um único tipo.
 [![CI](https://github.com/eduardoehg/jokenpo-arena/actions/workflows/ci.yml/badge.svg)](https://github.com/eduardoehg/jokenpo-arena/actions/workflows/ci.yml)
 
 TypeScript puro, sem framework e sem engine de jogo. Português e inglês.
-290 testes, zero dependências de runtime.
+288 testes, zero dependências de runtime.
 
 ---
 
@@ -122,8 +122,8 @@ uma arena inválida.
 
 ## Idiomas
 
-Português e inglês, alternáveis no gabinete. O idioma inicial vem da
-preferência do navegador e a escolha manual é lembrada.
+Português e inglês, alternáveis no gabinete. Entra em inglês por padrão, e a
+escolha do visitante é lembrada.
 
 Os valores de `EntityType` são IDs internos neutros (`rock`, `paper`,
 `scissors`) — nenhuma camada abaixo de `ui/` conhece texto de tela. O dicionário
@@ -136,7 +136,7 @@ uma tradução é erro de compilação**, não rótulo vazio em produção.
 npm install
 npm run dev        # servidor local
 npm run build      # build de produção
-npm test           # 290 testes
+npm test           # 288 testes
 npm run typecheck  # tsc --noEmit
 ```
 

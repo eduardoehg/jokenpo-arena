@@ -5,11 +5,13 @@ export type Language = 'pt' | 'en';
 export const LANGUAGES: readonly Language[] = ['pt', 'en'];
 
 /**
- * Idioma usado quando o navegador não pede nem português nem inglês.
+ * Idioma de entrada, antes de qualquer escolha do visitante.
  *
- * Inglês por ser a língua franca de quem chega ao projeto sem falar português.
+ * Inglês por ser a língua franca de quem chega ao projeto — a preferência do
+ * navegador não é consultada de propósito, para que o link abra igual para
+ * todo mundo.
  */
-export const FALLBACK_LANGUAGE: Language = 'en';
+export const DEFAULT_LANGUAGE: Language = 'en';
 
 /**
  * Dicionário português.
@@ -39,18 +41,18 @@ const PT = {
   copyLink: 'COPIAR LINK',
   linkCopied: 'COPIADO',
 
-  scoreboard: 'PLACAR TRINÁRIO',
   rules: 'REGRAS',
   rulePaper: 'PAPEL > PEDRA',
   ruleRock: 'PEDRA > TESOURA',
   ruleScissors: 'TESOURA > PAPEL',
-  conversions: 'CONVERSÕES',
+  battles: 'BATALHAS',
   livePopulation: 'POPULAÇÃO VIVA',
   elapsedTime: 'TEMPO DECORRIDO',
   speed: 'VELOCIDADE',
   pause: 'PAUSAR',
   resume: 'CONTINUAR',
   restart: 'REINICIAR',
+  home: 'INÍCIO',
   soundOn: 'SOM LIGADO',
   soundOff: 'SOM MUDO',
 
@@ -87,18 +89,18 @@ const EN: Record<MessageKey, string> = {
   copyLink: 'COPY LINK',
   linkCopied: 'COPIED',
 
-  scoreboard: 'TRINARY SCOREBOARD',
   rules: 'RULES',
   rulePaper: 'PAPER > ROCK',
   ruleRock: 'ROCK > SCISSORS',
   ruleScissors: 'SCISSORS > PAPER',
-  conversions: 'CONVERSIONS',
+  battles: 'BATTLES',
   livePopulation: 'LIVE POPULATION',
   elapsedTime: 'ELAPSED TIME',
   speed: 'SPEED',
   pause: 'PAUSE',
   resume: 'RESUME',
   restart: 'RESTART',
+  home: 'HOME',
   soundOn: 'SOUND ON',
   soundOff: 'MUTED',
 
@@ -132,22 +134,6 @@ export function translate(language: Language, key: MessageKey): string {
   return MESSAGES[language][key];
 }
 
-/**
- * Escolhe o idioma a partir da preferência do navegador.
- *
- * Compara só a subtag primária: `pt-BR`, `pt-PT` e `pt` valem todos como
- * português. Percorre a lista em ordem, respeitando a prioridade do usuário.
- */
-export function detectLanguage(preferred: readonly string[]): Language {
-  for (const tag of preferred) {
-    const primary = tag.toLowerCase().split('-')[0];
-    const match = LANGUAGES.find((language) => language === primary);
-    if (match) return match;
-  }
-
-  return FALLBACK_LANGUAGE;
-}
-
 export function isLanguage(value: unknown): value is Language {
   return LANGUAGES.some((language) => language === value);
 }
@@ -160,7 +146,7 @@ export function isLanguage(value: unknown): value is Language {
  * enfiado na assinatura de todos eles. As funções acima seguem puras — é só
  * este pedaço que guarda estado.
  */
-let current: Language = FALLBACK_LANGUAGE;
+let current: Language = DEFAULT_LANGUAGE;
 
 export function setLanguage(language: Language): void {
   current = language;

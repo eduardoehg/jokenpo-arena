@@ -60,7 +60,7 @@ export function createEndScreen(handlers: EndHandlers): EndScreen {
   const icon = byId<HTMLCanvasElement>('winner-icon');
   const name = byId('winner-name');
   const time = byId('end-time');
-  const conversions = byId('end-conversions');
+  const battles = byId('end-battles');
   const setup = byId('end-setup');
   const seedValue = byId('end-seed');
   const share = byId<HTMLButtonElement>('btn-share');
@@ -108,7 +108,7 @@ export function createEndScreen(handlers: EndHandlers): EndScreen {
       name.style.color = TYPE_COLORS[result.winner];
 
       time.textContent = formatClock(result.elapsed);
-      conversions.textContent = pad(result.conversions, 4);
+      battles.textContent = pad(result.conversions, 4);
       setup.textContent = formatSetup(result.setup);
 
       renderChart(result.samples);

@@ -22,7 +22,7 @@ import { createControls, type SpeedStep } from './ui/controls';
 import { byId } from './ui/dom';
 import { createEndScreen, type MatchResult } from './ui/end-screen';
 import { pushMatch, type MatchRecord } from './ui/history';
-import { detectLanguage, setLanguage } from './ui/i18n';
+import { DEFAULT_LANGUAGE, setLanguage } from './ui/i18n';
 import { createLanguageSwitch } from './ui/language-switch';
 import { createMotionPreference } from './ui/motion';
 import {
@@ -90,11 +90,10 @@ function arenaContext(): CanvasRenderingContext2D {
  * Idioma antes de tudo: os módulos de UI leem rótulos traduzidos já na
  * construção, então trocar depois deixaria texto obsoleto na tela.
  *
- * A escolha salva vence a preferência do navegador — quem trocou uma vez quis
- * aquilo, mesmo que o sistema esteja em outro idioma.
+ * Entra sempre em inglês, a menos que o visitante já tenha escolhido outro. A
+ * preferência do navegador não é consultada: o link abre igual para todo mundo.
  */
-const browserLanguages = navigator.languages ?? [navigator.language];
-setLanguage(loadLanguage() ?? detectLanguage(browserLanguages));
+setLanguage(loadLanguage() ?? DEFAULT_LANGUAGE);
 
 const motion = createMotionPreference();
 const audio = createAudio(loadSoundEnabled());
@@ -263,6 +262,15 @@ const controls = createControls({
 
   // Reiniciar repete a mesma seed: é a mesma partida de novo, do zero.
   onRestart: () => startMatch(),
+
+  onHome() {
+    // Sai da arena com a partida pausada: voltar não deve fazer o jogador
+    // perder o que estava acontecendo enquanto mexe na configuração.
+    paused = true;
+    controls.setPaused(true);
+    configScreen.sync(matchConfig, seed);
+    screens.show('config');
+  },
 });
 
 /** Avança a simulação em passos fixos, consumindo o tempo do quadro. */
