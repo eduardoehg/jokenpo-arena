@@ -36,8 +36,6 @@ body {
 
 /* Gabinete de arcade: bevel duro, sem blur nem raio de canto. */
 .cabinet {
-  /* Bloco de contenção do seletor de idioma, que flutua no canto. */
-  position: relative;
   width: min(1180px, 100%);
   padding: 32px;
   background: var(--gabinete);
@@ -74,14 +72,6 @@ body {
 }
 
 /* ---------- Placar Trinário ---------- */
-
-.scoreboard-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  /* Reserva a faixa do seletor, que flutua sobre o canto do gabinete. */
-  padding-right: 120px;
-}
 
 .scoreboard {
   display: flex;
@@ -313,18 +303,22 @@ body {
 /* ---------- seletor de idioma ---------- */
 
 /*
- * Fora do fluxo, ancorado no canto do gabinete.
+ * Cabeçalho de tela: título à esquerda, seletor de idioma à direita.
  *
- * Em fluxo normal ele consumia uma linha inteira só para si e empurrava o
- * título para baixo. Flutuando, os dois dividem a mesma faixa e a tela ganha
- * a altura de volta. Vale para as três telas, já que ele vive no gabinete e
- * não dentro de nenhuma delas.
+ * O seletor mora aqui, no fluxo, e não flutuando sobre o gabinete. É o que
+ * deixa o alinhamento vertical com o título a cargo do `align-items: center`,
+ * em vez de depender de um `top` calibrado à mão — que erra assim que o título
+ * muda de tamanho entre a tela inicial e a de batalha.
  */
+.screen-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .lang-switch {
-  position: absolute;
-  top: 32px;
-  right: 32px;
-  z-index: 2;
+  /* Encosta à direita mesmo quando é o único item do cabeçalho. */
+  margin-left: auto;
   display: flex;
   gap: 4px;
 }
@@ -348,8 +342,6 @@ body {
   font-family: var(--display);
   font-size: 48px;
   line-height: 1.3;
-  /* Reserva a faixa do seletor: o título nunca corre por baixo dele. */
-  padding-right: 120px;
   text-shadow: 6px 6px 0 var(--magenta);
 }
 
@@ -505,8 +497,7 @@ body {
   flex-wrap: wrap;
   gap: 48px;
   align-items: center;
-  /* Reserva a faixa do seletor, que flutua sobre o canto do gabinete. */
-  padding-right: 120px;
+  margin-top: 24px;
 }
 
 #winner-icon {
@@ -662,25 +653,13 @@ body {
     width: 100%;
   }
 
-  /* Acompanha o padding menor do gabinete. */
-  .lang-switch {
-    top: 18px;
-    right: 18px;
-  }
-
   .title {
     font-size: 32px;
-    padding-right: 90px;
   }
 
   /* Depois da regra acima de propósito: mesma especificidade, esta vence. */
   .title--compact {
     font-size: 16px;
-  }
-
-  .scoreboard-head,
-  .end-head {
-    padding-right: 90px;
   }
 
   .end-head {

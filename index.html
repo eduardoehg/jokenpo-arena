@@ -7,14 +7,20 @@
   </head>
   <body>
     <div class="cabinet">
-      <div class="lang-switch">
+      <!--
+        Único no documento: o roteador de telas o move para o cabeçalho da tela
+        ativa, onde o flexbox alinha os dois pela altura.
+      -->
+      <div class="lang-switch" id="lang-switch">
         <button class="btn lang-btn" data-lang="pt" type="button">PT</button>
         <button class="btn lang-btn" data-lang="en" type="button">EN</button>
       </div>
 
       <!-- ============ 1. CONFIGURAÇÃO ============ -->
       <section id="screen-config">
-        <h1 class="title">JOKENPO<br />ARENA</h1>
+        <header class="screen-head" data-lang-slot>
+          <h1 class="title">JOKENPO<br />ARENA</h1>
+        </header>
         <p class="label subtitle" data-i18n="subtitle"></p>
 
         <div class="cards">
@@ -81,7 +87,7 @@
 
       <!-- ============ 2. ARENA ============ -->
       <section id="screen-arena" class="hidden">
-        <header class="scoreboard-head">
+        <header class="screen-head" data-lang-slot>
           <h1 class="title title--compact">JOKENPO ARENA</h1>
         </header>
 
@@ -149,6 +155,8 @@
 
       <!-- ============ 3. FIM DE PARTIDA ============ -->
       <section id="screen-end" class="hidden">
+        <header class="screen-head" data-lang-slot></header>
+
         <div class="end-head">
           <canvas id="winner-icon" width="224" height="224"></canvas>
           <div class="end-info">
