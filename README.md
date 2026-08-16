@@ -8,7 +8,7 @@ até restar um único tipo.
 [![CI](https://github.com/eduardoehg/jokenpo-arena/actions/workflows/ci.yml/badge.svg)](https://github.com/eduardoehg/jokenpo-arena/actions/workflows/ci.yml)
 
 TypeScript puro, sem framework e sem engine de jogo. Português e inglês.
-226 testes.
+290 testes, zero dependências de runtime.
 
 ---
 
@@ -40,10 +40,18 @@ uso acidental de `document` ou `window` quebra a suíte na hora.
 |---|---|
 | `core/rules` | Quem vence quem |
 | `core/entity` | O tipo `Entity` e sua construção |
+| `core/rng` | Gerador determinístico semeado |
 | `core/spawn` | Geração nos três portais, com RNG injetável |
 | `core/physics` | Movimento por delta time e reflexão nas paredes |
 | `core/collision` | Spatial hash grid e resolução de colisões |
 | `core/simulation` | Orquestra um tick: recebe `dt`, devolve novo estado |
+
+A regra de dependência é **verificada por teste**: `core/architecture.test.ts`
+lê cada módulo de produção, extrai os imports e procura globais de browser no
+código executável. E como um teste de fronteira que não sabe falhar é
+decoração, ele também alimenta os próprios detectores com código violador
+fabricado — import de camada proibida, import dinâmico, re-export — para provar
+que acusam.
 
 ## Decisões técnicas
 
@@ -89,6 +97,29 @@ os números correm dentro deles. Quando um tipo cai abaixo de 13%, seu número
 salta para fora da barra e assume a cor do tipo — a população moribunda nunca
 some da leitura.
 
+## Partidas reproduzíveis
+
+Toda partida nasce de uma seed de 32 bits, e a URL carrega a seed junto com as
+três populações e a velocidade. Abrir o mesmo link reproduz a partida idêntica,
+quadro a quadro — sem servidor, sem gravação, sem estado compartilhado.
+
+Só funciona porque a simulação é determinística de ponta a ponta: `Math.random`
+não aparece em lugar nenhum do `core/`, o RNG entra por parâmetro, e o spawn
+consome uma quantidade fixa de sorteios por entidade, sempre na mesma ordem.
+
+A seed sozinha não bastaria — com outra população o mesmo gerador produz outra
+partida —, então o link é autocontido. E a decodificação valida tudo contra os
+limites do jogo: um link truncado ou adulterado cai no padrão em vez de gerar
+uma arena inválida.
+
+## Acessibilidade
+
+- **Forma antes de cor**, com silhuetas distintas por tipo
+- **`prefers-reduced-motion`** desliga flash, explosão e hit-stop; a simulação
+  segue, porque ela é o conteúdo e não um efeito
+- Alvos de toque de 44px nos steppers e botões
+- Som ligado por padrão, com botão para silenciar e escolha lembrada
+
 ## Idiomas
 
 Português e inglês, alternáveis no gabinete. O idioma inicial vem da
@@ -105,13 +136,14 @@ uma tradução é erro de compilação**, não rótulo vazio em produção.
 npm install
 npm run dev        # servidor local
 npm run build      # build de produção
-npm test           # 226 testes
+npm test           # 290 testes
 npm run typecheck  # tsc --noEmit
 ```
 
 ## Stack
 
-Vite · TypeScript · Vitest · Canvas 2D · GitHub Pages
+Vite · TypeScript · Vitest · Canvas 2D · WebAudio · GitHub Pages
 
 Nenhuma dependência de runtime além das fontes, que são servidas do próprio
-domínio via `@fontsource` — a página não faz requisição externa nenhuma.
+domínio via `@fontsource` — a página não faz requisição externa nenhuma. O som
+é sintetizado com WebAudio, sem nenhum arquivo de áudio no bundle.
