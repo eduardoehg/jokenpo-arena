@@ -4,6 +4,7 @@ import type { Arena } from './physics';
 import { ENTITY_TYPES, type EntityType } from './rules';
 import {
   DEFAULT_PORTAL_SPAN,
+  DEFAULT_SPEED_JITTER,
   SPAWN_EDGES,
   spawnEntities,
   type Edge,
@@ -82,7 +83,7 @@ describe('spawnEntities — quantidades', () => {
     expect(spawnEntities({ ...BASE, counts: uniform(0) })).toEqual([]);
   });
 
-  it('consome exatamente três sorteios por entidade', () => {
+  it('consome exatamente quatro sorteios por entidade', () => {
     let calls = 0;
     const counting: Rng = () => {
       calls++;
@@ -91,7 +92,7 @@ describe('spawnEntities — quantidades', () => {
 
     spawnEntities({ ...BASE, counts: uniform(4) }, counting);
 
-    expect(calls).toBe(3 * 4 * 3);
+    expect(calls).toBe(3 * 4 * 4);
   });
 });
 
@@ -222,14 +223,69 @@ describe('spawnEntities — posição válida', () => {
   });
 });
 
-describe('spawnEntities — direção', () => {
-  it('todas saem com o módulo de velocidade pedido', () => {
-    const entities = spawnEntities({ ...BASE, counts: uniform(50) });
+describe('spawnEntities — velocidade', () => {
+  const speedOf = (e: Entity): number => Math.hypot(e.vx, e.vy);
+
+  it('varia em torno da base dentro da faixa da dispersão', () => {
+    const entities = spawnEntities({ ...BASE, counts: uniform(60) });
 
     for (const e of entities) {
-      expect(Math.hypot(e.vx, e.vy)).toBeCloseTo(SPEED);
+      expect(speedOf(e)).toBeGreaterThanOrEqual(
+        SPEED * (1 - DEFAULT_SPEED_JITTER) - 1e-9,
+      );
+      expect(speedOf(e)).toBeLessThanOrEqual(
+        SPEED * (1 + DEFAULT_SPEED_JITTER) + 1e-9,
+      );
     }
   });
+
+  it('realmente produz velocidades diferentes entre as peças', () => {
+    // Sem isto, as três ondas avançariam em bloco e se encontrariam numa
+    // frente reta.
+    const speeds = new Set(
+      spawnEntities({ ...BASE, counts: uniform(60) }).map(speedOf),
+    );
+
+    expect(speeds.size).toBeGreaterThan(100);
+  });
+
+  it('mantém a média próxima da velocidade base', () => {
+    const entities = spawnEntities({ ...BASE, counts: uniform(200) });
+    const mean =
+      entities.reduce((sum, e) => sum + speedOf(e), 0) / entities.length;
+
+    expect(mean).toBeGreaterThan(SPEED * 0.94);
+    expect(mean).toBeLessThan(SPEED * 1.06);
+  });
+
+  it('jitter zero devolve exatamente a velocidade base', () => {
+    const entities = spawnEntities({
+      ...BASE,
+      counts: uniform(20),
+      speedJitter: 0,
+    });
+
+    for (const e of entities) expect(speedOf(e)).toBeCloseTo(SPEED);
+  });
+
+  it('mapeia os extremos do sorteio nos limites da variação', () => {
+    // Por entidade a ordem é: along, depth, ângulo, velocidade.
+    const one = { rock: 1, paper: 0, scissors: 0 };
+    const slowest = spawnEntities(
+      { ...BASE, counts: one, speedJitter: 0.5 },
+      sequence([0.5, 0.5, 0.5, 0]),
+    );
+    const fastest = spawnEntities(
+      { ...BASE, counts: one, speedJitter: 0.5 },
+      sequence([0.5, 0.5, 0.5, 1]),
+    );
+
+    expect(speedOf(slowest[0])).toBeCloseTo(SPEED * 0.5);
+    expect(speedOf(fastest[0])).toBeCloseTo(SPEED * 1.5);
+  });
+});
+
+describe('spawnEntities — direção', () => {
 
   it('sai apontando para dentro da arena, nunca para a parede de trás', () => {
     const entities = spawnEntities({ ...BASE, counts: uniform(100) });
@@ -255,7 +311,12 @@ describe('spawnEntities — direção', () => {
   });
 
   it('spread zero produz um feixe perfeitamente reto', () => {
-    const entities = spawnEntities({ ...BASE, counts: uniform(10), spread: 0 });
+    const entities = spawnEntities({
+      ...BASE,
+      counts: uniform(10),
+      spread: 0,
+      speedJitter: 0,
+    });
 
     for (const e of ofType(entities, 'rock')) {
       expect(e.vy).toBeCloseTo(0);
