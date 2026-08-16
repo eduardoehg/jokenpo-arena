@@ -51,6 +51,8 @@ const PT = {
   pause: 'PAUSAR',
   resume: 'CONTINUAR',
   restart: 'REINICIAR',
+  soundOn: 'SOM LIGADO',
+  soundOff: 'SOM MUDO',
 
   matchOver: 'FIM DE PARTIDA',
   wins: 'VENCE',
@@ -97,6 +99,8 @@ const EN: Record<MessageKey, string> = {
   pause: 'PAUSE',
   resume: 'RESUME',
   restart: 'RESTART',
+  soundOn: 'SOUND ON',
+  soundOff: 'MUTED',
 
   matchOver: 'MATCH OVER',
   wins: 'WINS',

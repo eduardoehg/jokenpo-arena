@@ -16,6 +16,7 @@ import {
   pushConversions,
 } from './render/effects';
 import { render } from './render/renderer';
+import { createAudio } from './ui/audio';
 import { createConfigScreen } from './ui/config-screen';
 import { createControls, type SpeedStep } from './ui/controls';
 import { byId } from './ui/dom';
@@ -24,7 +25,13 @@ import { pushMatch, type MatchRecord } from './ui/history';
 import { detectLanguage, setLanguage } from './ui/i18n';
 import { createLanguageSwitch } from './ui/language-switch';
 import { createMotionPreference } from './ui/motion';
-import { loadHistory, loadLanguage, saveHistory } from './ui/preferences';
+import {
+  loadHistory,
+  loadLanguage,
+  loadSoundEnabled,
+  saveHistory,
+  saveSoundEnabled,
+} from './ui/preferences';
 import { renderHistory } from './ui/history-list';
 import { createHud } from './ui/hud';
 import {
@@ -90,6 +97,7 @@ const browserLanguages = navigator.languages ?? [navigator.language];
 setLanguage(loadLanguage() ?? detectLanguage(browserLanguages));
 
 const motion = createMotionPreference();
+const audio = createAudio(loadSoundEnabled());
 
 const ctx = arenaContext();
 const screens = createScreens('config');
@@ -138,6 +146,10 @@ let lastFrame = performance.now();
  * histórico do navegador não fica poluído com uma entrada por partida.
  */
 function startMatch(nextSeed?: Seed): void {
+  // Chega aqui sempre por clique, que é o gesto que a política de autoplay
+  // exige para o áudio sair do estado suspenso.
+  audio.unlock();
+
   if (nextSeed !== undefined) seed = nextSeed;
 
   setup = { ...matchConfig.counts };
@@ -171,6 +183,8 @@ function finishMatch(winner: EntityType): void {
     seed: matchSeed,
   };
 
+  audio.victory(winner);
+
   history = pushMatch(history, result);
   saveHistory(history);
   renderHistory(history);
@@ -192,6 +206,7 @@ function refreshLanguage(): void {
   configScreen.sync(matchConfig, seed);
   configScreen.refreshLabels();
   controls.setPaused(paused);
+  controls.setSound(audio.enabled());
   renderHistory(history);
   if (lastResult) endScreen.show(lastResult);
 }
@@ -240,6 +255,12 @@ const controls = createControls({
     controls.setPaused(paused);
   },
 
+  onSoundToggle() {
+    audio.setEnabled(!audio.enabled());
+    saveSoundEnabled(audio.enabled());
+    controls.setSound(audio.enabled());
+  },
+
   // Reiniciar repete a mesma seed: é a mesma partida de novo, do zero.
   onRestart: () => startMatch(),
 });
@@ -265,6 +286,11 @@ function simulate(dt: number): void {
     if (sinceHitStop >= HIT_STOP_COOLDOWN) {
       hitStop = HIT_STOP;
       sinceHitStop = 0;
+
+      // O bleep segue o mesmo intervalo mínimo do congelamento. Uma nota por
+      // conversão viraria ruído branco no auge da partida.
+      audio.conversion(state.conversions[0].to);
+
       break; // congela já neste quadro, não no seguinte
     }
   }
@@ -309,5 +335,6 @@ languageSwitch.apply();
 configScreen.sync(matchConfig, seed);
 controls.setSpeed(speed);
 controls.setPaused(paused);
+controls.setSound(audio.enabled());
 renderHistory(history);
 requestAnimationFrame(frame);

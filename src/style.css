@@ -283,6 +283,15 @@ body {
   color: var(--muted);
 }
 
+#btn-sound {
+  font-size: 10px;
+  padding: 14px;
+}
+
+#btn-sound.muted {
+  color: var(--dim);
+}
+
 .btn-primary {
   font-family: var(--display);
   font-size: 20px;
