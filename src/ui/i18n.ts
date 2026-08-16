@@ -62,7 +62,6 @@ const PT = {
   initialSetup: 'SETUP INICIAL',
   populationEvolution: 'EVOLUÇÃO DAS POPULAÇÕES',
   playAgain: 'JOGAR DE NOVO',
-  adjustParameters: 'AJUSTAR PARÂMETROS',
 } as const;
 
 export type MessageKey = keyof typeof PT;
@@ -110,7 +109,6 @@ const EN: Record<MessageKey, string> = {
   initialSetup: 'INITIAL SETUP',
   populationEvolution: 'POPULATION EVOLUTION',
   playAgain: 'PLAY AGAIN',
-  adjustParameters: 'ADJUST PARAMETERS',
 };
 
 export const MESSAGES: Record<Language, Record<MessageKey, string>> = {
