@@ -41,7 +41,6 @@ const PT = {
   copyLink: 'COPIAR LINK',
   linkCopied: 'COPIADO',
 
-  scoreboard: 'PLACAR TRINÁRIO',
   rules: 'REGRAS',
   rulePaper: 'PAPEL > PEDRA',
   ruleRock: 'PEDRA > TESOURA',
@@ -90,7 +89,6 @@ const EN: Record<MessageKey, string> = {
   copyLink: 'COPY LINK',
   linkCopied: 'COPIED',
 
-  scoreboard: 'TRINARY SCOREBOARD',
   rules: 'RULES',
   rulePaper: 'PAPER > ROCK',
   ruleRock: 'ROCK > SCISSORS',
