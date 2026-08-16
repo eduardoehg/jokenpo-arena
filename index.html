@@ -7,62 +7,63 @@
   </head>
   <body>
     <div class="cabinet">
+      <div class="lang-switch">
+        <button class="btn lang-btn" data-lang="pt" type="button">PT</button>
+        <button class="btn lang-btn" data-lang="en" type="button">EN</button>
+      </div>
+
       <!-- ============ 1. CONFIGURAÇÃO ============ -->
       <section id="screen-config">
         <h1 class="title">JOKENPO<br />ARENA</h1>
-        <p class="label subtitle">
-          SIMULADOR DE COMBATE · 3 POPULAÇÕES · 1 SOBREVIVENTE
-        </p>
+        <p class="label subtitle" data-i18n="subtitle"></p>
 
         <div class="cards">
           <div class="panel card">
             <canvas class="card-icon" data-type="paper" width="96" height="96"></canvas>
-            <div class="num card-name">PAPEL</div>
+            <div class="num card-name" data-i18n="typePaper"></div>
             <div class="stepper">
               <button class="btn step" data-bump="paper" data-delta="-5" type="button">-</button>
               <div class="num card-count" id="cfg-paper">030</div>
               <button class="btn step" data-bump="paper" data-delta="5" type="button">+</button>
             </div>
-            <div class="label">PORTAL NORTE</div>
+            <div class="label" data-i18n="portalNorth"></div>
           </div>
 
           <div class="panel card card--rock">
             <canvas class="card-icon" data-type="rock" width="96" height="96"></canvas>
-            <div class="num card-name">PEDRA</div>
+            <div class="num card-name" data-i18n="typeRock"></div>
             <div class="stepper">
               <button class="btn step" data-bump="rock" data-delta="-5" type="button">-</button>
               <div class="num card-count" id="cfg-rock">030</div>
               <button class="btn step" data-bump="rock" data-delta="5" type="button">+</button>
             </div>
-            <div class="label">PORTAL OESTE</div>
+            <div class="label" data-i18n="portalWest"></div>
           </div>
 
           <div class="panel card card--scissors">
             <canvas class="card-icon" data-type="scissors" width="96" height="96"></canvas>
-            <div class="num card-name">TESOURA</div>
+            <div class="num card-name" data-i18n="typeScissors"></div>
             <div class="stepper">
               <button class="btn step" data-bump="scissors" data-delta="-5" type="button">-</button>
               <div class="num card-count" id="cfg-scissors">030</div>
               <button class="btn step" data-bump="scissors" data-delta="5" type="button">+</button>
             </div>
-            <div class="label">PORTAL LESTE</div>
+            <div class="label" data-i18n="portalEast"></div>
           </div>
         </div>
 
         <div class="panel speed-panel">
           <div class="speed-head">
-            <span class="label">VELOCIDADE BASE</span>
+            <span class="label" data-i18n="speedBase"></span>
             <span class="num" id="cfg-speed">05</span>
           </div>
           <div class="speed-cells" id="speed-cells"></div>
         </div>
 
-        <button class="btn-primary btn-start" id="btn-start" type="button">
-          INICIAR BATALHA
-        </button>
+        <button class="btn-primary btn-start" id="btn-start" type="button" data-i18n="startBattle"></button>
 
         <div class="history-block">
-          <div class="label">HISTÓRICO</div>
+          <div class="label" data-i18n="history"></div>
           <div class="history" id="history-config"></div>
         </div>
       </section>
@@ -70,7 +71,7 @@
       <!-- ============ 2. ARENA ============ -->
       <section id="screen-arena" class="hidden">
         <header class="scoreboard-head">
-          <span class="label">PLACAR TRINÁRIO</span>
+          <span class="label" data-i18n="scoreboard"></span>
           <span class="num" id="clock-top">T+00:00</span>
         </header>
 
@@ -83,15 +84,15 @@
         <div class="layout">
           <aside class="col col--left">
             <div>
-              <div class="label">REGRAS</div>
+              <div class="label" data-i18n="rules"></div>
               <ul class="rules">
-                <li>PAPEL &gt; PEDRA</li>
-                <li>PEDRA &gt; TESOURA</li>
-                <li>TESOURA &gt; PAPEL</li>
+                <li data-i18n="rulePaper"></li>
+                <li data-i18n="ruleRock"></li>
+                <li data-i18n="ruleScissors"></li>
               </ul>
             </div>
             <div>
-              <div class="label">CONVERSÕES</div>
+              <div class="label" data-i18n="conversions"></div>
               <div class="num accent" id="conversions">0000</div>
             </div>
           </aside>
@@ -102,25 +103,25 @@
 
           <aside class="col col--right">
             <div class="panel">
-              <div class="label">POPULAÇÃO VIVA</div>
+              <div class="label" data-i18n="livePopulation"></div>
               <div class="stat stat--paper">
-                <span>PAPEL</span><span class="num" id="count-paper">030</span>
+                <span data-i18n="typePaper"></span><span class="num" id="count-paper">030</span>
               </div>
               <div class="stat stat--rock">
-                <span>PEDRA</span><span class="num" id="count-rock">030</span>
+                <span data-i18n="typeRock"></span><span class="num" id="count-rock">030</span>
               </div>
               <div class="stat stat--scissors">
-                <span>TESOURA</span><span class="num" id="count-scissors">030</span>
+                <span data-i18n="typeScissors"></span><span class="num" id="count-scissors">030</span>
               </div>
             </div>
 
             <div class="panel">
-              <div class="label">TEMPO DECORRIDO</div>
+              <div class="label" data-i18n="elapsedTime"></div>
               <div class="num clock" id="clock">T+00:00</div>
             </div>
 
             <div class="panel">
-              <div class="label">VELOCIDADE</div>
+              <div class="label" data-i18n="speed"></div>
               <div class="speed-row">
                 <button class="btn speed-btn" data-speed="1" type="button">1X</button>
                 <button class="btn speed-btn" data-speed="2" type="button">2X</button>
@@ -129,7 +130,7 @@
             </div>
 
             <button class="btn btn-pause" id="btn-pause" type="button">PAUSAR</button>
-            <button class="btn btn-ghost" id="btn-restart" type="button">REINICIAR</button>
+            <button class="btn btn-ghost" id="btn-restart" type="button" data-i18n="restart"></button>
           </aside>
         </div>
       </section>
@@ -139,19 +140,19 @@
         <div class="end-head">
           <canvas id="winner-icon" width="224" height="224"></canvas>
           <div class="end-info">
-            <div class="label">FIM DE PARTIDA</div>
-            <div class="num end-title" id="winner-name">PAPEL VENCE</div>
+            <div class="label" data-i18n="matchOver"></div>
+            <div class="num end-title" id="winner-name"></div>
             <div class="end-stats">
               <div>
-                <div class="label">TEMPO TOTAL</div>
+                <div class="label" data-i18n="totalTime"></div>
                 <div class="num end-stat" id="end-time">T+00:00</div>
               </div>
               <div>
-                <div class="label">CONVERSÕES</div>
+                <div class="label" data-i18n="conversions"></div>
                 <div class="num end-stat accent" id="end-conversions">0000</div>
               </div>
               <div>
-                <div class="label">SETUP INICIAL</div>
+                <div class="label" data-i18n="initialSetup"></div>
                 <div class="num end-stat" id="end-setup">30/30/30</div>
               </div>
             </div>
@@ -159,17 +160,17 @@
         </div>
 
         <div class="chart-block">
-          <div class="label">EVOLUÇÃO DAS POPULAÇÕES</div>
+          <div class="label" data-i18n="populationEvolution"></div>
           <div class="chart" id="chart"></div>
         </div>
 
         <div class="end-actions">
-          <button class="btn-primary" id="btn-again" type="button">JOGAR DE NOVO</button>
-          <button class="btn btn-ghost" id="btn-adjust" type="button">AJUSTAR PARÂMETROS</button>
+          <button class="btn-primary" id="btn-again" type="button" data-i18n="playAgain"></button>
+          <button class="btn btn-ghost" id="btn-adjust" type="button" data-i18n="adjustParameters"></button>
         </div>
 
         <div class="history-block">
-          <div class="label">HISTÓRICO</div>
+          <div class="label" data-i18n="history"></div>
           <div class="history" id="history-end"></div>
         </div>
       </section>

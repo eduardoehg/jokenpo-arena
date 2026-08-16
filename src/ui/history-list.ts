@@ -1,8 +1,7 @@
 import { byId } from './dom';
-import { formatClock } from './format';
+import { formatClock, pad } from './format';
 import { formatSetup, type MatchRecord } from './history';
-import { TYPE_LABELS } from './labels';
-import { pad } from './format';
+import { typeLabel } from './i18n';
 
 /** Containers que exibem o histórico — ele aparece na config e no fim. */
 const CONTAINERS = ['history-config', 'history-end'];
@@ -13,7 +12,7 @@ function row(record: MatchRecord): HTMLElement {
 
   const cells: [string, string][] = [
     ['hist-number', `#${pad(record.number, 2)}`],
-    [`hist-winner hist-winner--${record.winner}`, TYPE_LABELS[record.winner]],
+    [`hist-winner hist-winner--${record.winner}`, typeLabel(record.winner)],
     ['hist-time', formatClock(record.elapsed)],
     ['hist-setup', formatSetup(record.setup)],
   ];

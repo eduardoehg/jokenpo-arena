@@ -1,4 +1,5 @@
 import { byClass, byId } from './dom';
+import { t } from './i18n';
 
 /** Multiplicadores de tempo simulado oferecidos pelo HUD. */
 export const SPEED_STEPS = [1, 2, 4] as const;
@@ -48,7 +49,9 @@ export function createControls(handlers: ControlHandlers): Controls {
     },
 
     setPaused(paused) {
-      pauseButton.textContent = paused ? 'CONTINUAR' : 'PAUSAR';
+      // Traduzido na hora: o rótulo depende do estado, então `data-i18n` não
+      // daria conta e a troca de idioma precisa passar por aqui de novo.
+      pauseButton.textContent = paused ? t('resume') : t('pause');
       pauseButton.classList.toggle('resumed', paused);
     },
   };

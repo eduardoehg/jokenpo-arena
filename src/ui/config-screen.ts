@@ -3,6 +3,7 @@ import { TYPE_COLORS } from '../render/palette';
 import { renderIcon } from '../render/sprites';
 import { byClass, byId } from './dom';
 import { pad } from './format';
+import { t } from './i18n';
 import {
   MAX_SPEED_LEVEL,
   MIN_SPEED_LEVEL,
@@ -17,6 +18,8 @@ export interface ConfigHandlers {
 
 export interface ConfigScreen {
   sync(config: MatchConfig): void;
+  /** Reescreve os rótulos que carregam número junto, após troca de idioma. */
+  refreshLabels(): void;
 }
 
 /**
@@ -61,6 +64,13 @@ export function createConfigScreen(handlers: ConfigHandlers): ConfigScreen {
         speedCells[i].classList.toggle('lit', i < config.speedLevel);
       }
     },
+
+    refreshLabels() {
+      for (const cell of speedCells) {
+        const level = cell.dataset.speedLevel ?? '';
+        cell.setAttribute('aria-label', `${t('speedLevel')} ${level}`);
+      }
+    },
   };
 }
 
@@ -73,7 +83,10 @@ function buildSpeedCells(handlers: ConfigHandlers): HTMLButtonElement[] {
     const cell = document.createElement('button');
     cell.type = 'button';
     cell.className = 'speed-cell';
-    cell.setAttribute('aria-label', `Velocidade ${level}`);
+    // O número é sufixo do rótulo traduzido; `refreshSpeedCellLabels` reescreve
+    // isto quando o idioma muda.
+    cell.dataset.speedLevel = String(level);
+    cell.setAttribute('aria-label', `${t('speedLevel')} ${level}`);
     cell.addEventListener('click', () => handlers.onSpeedLevel(level));
     cells.push(cell);
   }

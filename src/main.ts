@@ -18,8 +18,11 @@ import { render } from './render/renderer';
 import { createConfigScreen } from './ui/config-screen';
 import { createControls, type SpeedStep } from './ui/controls';
 import { byId } from './ui/dom';
-import { createEndScreen } from './ui/end-screen';
+import { createEndScreen, type MatchResult } from './ui/end-screen';
 import { pushMatch, type MatchRecord } from './ui/history';
+import { detectLanguage, setLanguage } from './ui/i18n';
+import { createLanguageSwitch } from './ui/language-switch';
+import { loadLanguage } from './ui/preferences';
 import { renderHistory } from './ui/history-list';
 import { createHud } from './ui/hud';
 import {
@@ -73,6 +76,16 @@ function arenaContext(): CanvasRenderingContext2D {
   return context;
 }
 
+/**
+ * Idioma antes de tudo: os módulos de UI leem rótulos traduzidos já na
+ * construção, então trocar depois deixaria texto obsoleto na tela.
+ *
+ * A escolha salva vence a preferência do navegador — quem trocou uma vez quis
+ * aquilo, mesmo que o sistema esteja em outro idioma.
+ */
+const browserLanguages = navigator.languages ?? [navigator.language];
+setLanguage(loadLanguage() ?? detectLanguage(browserLanguages));
+
 const ctx = arenaContext();
 const screens = createScreens('config');
 const hud = createHud();
@@ -87,6 +100,9 @@ let state = createSimulation(toSpawnConfig(matchConfig, ARENA));
 let effects = createEffects(state.entities.length);
 let timeline = createTimeline(countByType(state.entities));
 let history: MatchRecord[] = [];
+
+/** Última partida encerrada, para redesenhar a tela de fim ao trocar idioma. */
+let lastResult: MatchResult | null = null;
 
 let speed: SpeedStep = 1;
 let paused = false;
@@ -122,8 +138,24 @@ function finishMatch(winner: EntityType): void {
   history = pushMatch(history, result);
   renderHistory(history);
 
-  endScreen.show({ ...result, samples: timeline.samples });
+  lastResult = { ...result, samples: timeline.samples };
+  endScreen.show(lastResult);
   screens.show('end');
+}
+
+/**
+ * Redesenha tudo que não é `data-i18n` depois de trocar de idioma.
+ *
+ * O texto estático o próprio switch reescreve; sobra o que é gerado em
+ * runtime — botão de pausa, rótulos com número, nomes de tipo no histórico e
+ * na tela de fim.
+ */
+function refreshLanguage(): void {
+  languageSwitch.apply();
+  configScreen.refreshLabels();
+  controls.setPaused(paused);
+  renderHistory(history);
+  if (lastResult) endScreen.show(lastResult);
 }
 
 const configScreen = createConfigScreen({
@@ -144,6 +176,8 @@ const endScreen = createEndScreen({
   onAgain: startMatch,
   onAdjust: () => screens.show('config'),
 });
+
+const languageSwitch = createLanguageSwitch(refreshLanguage);
 
 const controls = createControls({
   onSpeedChange(next) {
@@ -216,6 +250,7 @@ function frame(now: number): void {
   requestAnimationFrame(frame);
 }
 
+languageSwitch.apply();
 configScreen.sync(matchConfig);
 controls.setSpeed(speed);
 controls.setPaused(paused);
