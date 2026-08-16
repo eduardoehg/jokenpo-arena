@@ -314,6 +314,9 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
+  /* Rede de segurança: numa tela estreita demais o seletor cai para a linha
+     de baixo em vez de vazar para fora do gabinete. */
+  flex-wrap: wrap;
 }
 
 .lang-switch {
@@ -354,7 +357,13 @@ body {
 .title--compact {
   margin: 0;
   font-size: 24px;
-  line-height: 1;
+  /*
+   * `nowrap` porque a marca é uma unidade: quebrada em duas linhas ela deixa
+   * de ser o logo. E `line-height` acima de 1 porque a Press Start 2P tem
+   * glifos mais altos que a caixa — com 1, duas linhas se sobrepõem.
+   */
+  line-height: 1.2;
+  white-space: nowrap;
   text-shadow: 4px 4px 0 var(--magenta);
 }
 
@@ -665,16 +674,62 @@ body {
     width: 100%;
   }
 
+  /*
+   * Os tamanhos abaixo são calculados, não escolhidos por gosto: a Press Start
+   * 2P é monoespaçada com avanço de ~1em, então a largura de um texto é
+   * `caracteres × font-size`. Num aparelho de 360px sobram ~316px úteis dentro
+   * do gabinete, e é nesse orçamento que título e seletor precisam caber.
+   */
+
+  /* 7 caracteres × 28px = 196px, e sobram ~120px para o seletor. */
   .title {
-    font-size: 32px;
+    font-size: 28px;
   }
 
-  /* Depois da regra acima de propósito: mesma especificidade, esta vence. */
+  /* Depois da regra acima de propósito: mesma especificidade, esta vence.
+     13 caracteres × 14px = 182px. */
   .title--compact {
-    font-size: 16px;
+    font-size: 14px;
+  }
+
+  /* Seletor mais compacto: é o que libera a largura para o título. */
+  .lang-btn {
+    padding: 6px 10px;
+    font-size: 9px;
+  }
+
+  /* 8 caracteres de SCISSORS × 24px = 192px. Em 40px estourava a tela. */
+  .end-title {
+    font-size: 24px;
+  }
+
+  /* Numa barra de ~316px, um segmento de 17% tem ~53px: 3 dígitos de 18px não
+     cabiam e vazavam para fora do segmento. */
+  .seg > span {
+    font-size: 12px;
   }
 
   .end-head {
     gap: 24px;
+  }
+
+  /*
+   * Com o gabinete estreito o bloco do vencedor quebra em várias linhas, e o
+   * seletor ficava perdido no meio da página. Aqui ele vira a primeira linha
+   * inteira, encostado à direita.
+   */
+  .end-head > .lang-switch {
+    order: -1;
+    flex-basis: 100%;
+    justify-content: flex-end;
+  }
+
+  #winner-icon {
+    width: 120px;
+    height: 120px;
+  }
+
+  .end-stats {
+    gap: 20px 28px;
   }
 }
