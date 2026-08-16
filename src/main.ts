@@ -27,7 +27,6 @@ import { createLanguageSwitch } from './ui/language-switch';
 import { createMotionPreference } from './ui/motion';
 import {
   loadHistory,
-  loadLanguage,
   loadSoundEnabled,
   saveHistory,
   saveSoundEnabled,
@@ -90,10 +89,11 @@ function arenaContext(): CanvasRenderingContext2D {
  * Idioma antes de tudo: os módulos de UI leem rótulos traduzidos já na
  * construção, então trocar depois deixaria texto obsoleto na tela.
  *
- * Entra sempre em inglês, a menos que o visitante já tenha escolhido outro. A
- * preferência do navegador não é consultada: o link abre igual para todo mundo.
+ * Toda visita começa em inglês. Nem a preferência do navegador nem uma escolha
+ * anterior mudam isso — o link abre exatamente igual para todo mundo, e a troca
+ * de idioma vale para a sessão.
  */
-setLanguage(loadLanguage() ?? DEFAULT_LANGUAGE);
+setLanguage(DEFAULT_LANGUAGE);
 
 const motion = createMotionPreference();
 const audio = createAudio(loadSoundEnabled());

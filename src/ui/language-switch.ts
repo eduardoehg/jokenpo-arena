@@ -8,7 +8,6 @@ import {
   type Language,
   type MessageKey,
 } from './i18n';
-import { saveLanguage } from './preferences';
 
 export interface LanguageSwitch {
   /** Reescreve todo texto estático e marca o botão ativo. */
@@ -63,8 +62,8 @@ export function createLanguageSwitch(
       const next = button.dataset.lang;
       if (!isLanguage(next) || next === language()) return;
 
+      // A escolha vale para a sessão: a próxima visita volta ao inglês.
       setLanguage(next);
-      saveLanguage(next);
       onChange(next);
     });
   }
