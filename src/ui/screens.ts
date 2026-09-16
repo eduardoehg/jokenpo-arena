@@ -49,6 +49,11 @@ export function createScreens(initial: ScreenName): Screens {
     show(name) {
       active = name;
       apply();
+
+      // No celular o gabinete é mais alto que a viewport: quem rolou a home até
+      // o botão de começar chegava na arena com o canvas cortado ao meio. Trocar
+      // de tela recomeça a leitura, então a arena entra sempre pelo topo.
+      if (name === 'arena') window.scrollTo(0, 0);
     },
     current: () => active,
   };
